@@ -2,6 +2,7 @@ package net.education.kyivstar;
 
 import net.education.kyivstar.courseModel.*;
 import net.education.kyivstar.courseParticipants.FirstYearStudent;
+import net.education.kyivstar.courseParticipants.Reviser;
 import net.education.kyivstar.premises.Canteen;
 
 import java.util.*;
@@ -16,7 +17,8 @@ public class Main {
         Canteen canteen = new Canteen();
         FirstYearStudent firstYearStudent = new FirstYearStudent("Alex","Vinir",21);
         canteen.enter(firstYearStudent);
-
+        Reviser reviser = new Reviser("Alex","B",45);
+        reviser.revise(hybridCourse);
         hybridCourse.viewCourseSchedule("Tuesday");
         inPersonCourse.viewCourseSchedule("Tuesday");
 
