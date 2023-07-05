@@ -1,0 +1,23 @@
+# Gradle #
+/gradle/
+/gradlew
+/gradlew.bat
+.gradle
+*/build/
+build/
+
+# IntelliJ IDEA #
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+
+# Other #
+*/java/
+.allure
+allure*
+*.http
+logs
+log
+*.log
