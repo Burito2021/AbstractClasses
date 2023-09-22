@@ -10,10 +10,6 @@ public class GeographyClassRoom extends ClassRoom implements Paragraph {
 
 
 
-    @Override
-    public void learnParagraph( String paragraph) {
-        System.out.println("today's paragraph is "+paragraph);
-    }
 
     @Override
     public void studySubject(Subject name) {
