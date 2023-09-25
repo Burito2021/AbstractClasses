@@ -52,7 +52,6 @@ public class Storage {
     }
 
     public static void printStorage() {
-
         System.out.println("What is in the storage printStorage method: " + storage);
     }
 
