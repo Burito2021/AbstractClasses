@@ -7,9 +7,9 @@ import java.util.List;
 
 public class Storage {
 
-    protected final List<Human> storage;
+    private final List<Human> storage;
 
-    protected Storage() {
+    public Storage() {
         this.storage = new ArrayList<>();
     }
 

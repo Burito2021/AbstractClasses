@@ -1,110 +1,147 @@
 package net.education.kyivstar;
 
 import com.github.javafaker.Faker;
-import net.education.kyivstar.courseParticipants.Human;
-import net.education.kyivstar.courseParticipants.Reviser;
 import net.education.kyivstar.courseParticipants.Student;
-import net.education.kyivstar.courseParticipants.Teacher;
-import org.junit.jupiter.api.Assertions;
+import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Random;
 
-import static java.util.Arrays.*;
-import static java.util.Arrays.asList;
 import static net.education.kyivstar.Service.UserType.*;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ServiceTest {
-    Faker faker = new Faker();
-    Storage storage = new Storage();
-
-    Service service = new Service(new Faker(), storage, new Random());
+    Service service = new Service(new Faker(), new Random());
 
     @Test
     void populateStorageTest() {
 
-        Teacher teacher = new Teacher("Aleks", "Bur", 23);
+        service.populateStorage(2);
 
-        service.add(teacher);
+        final var actual = service.repository.getAll();
 
-        final var actual = storage.getStorage();
-        final var expected = asList(teacher);
-
-        assertEquals(expected, actual);
+        assertNotNull(actual);
     }
 
     @Test
     void createUserAndStoreTest() {
-       service.createUserAndStore(REVISER, "NameReviser", "SurnameReviser", 35);
+        //check revisers
+        service.createUserAndStore(REVISER, "NameReviser", "SurnameReviser", 35);
+        final var reviser = service.getByName("NameReviser");
+        assertNotNull(reviser);
+        assertFalse(reviser.isEmpty());
+        final var reviserObject = reviser.get(0);
+        assertEquals("NameReviser", reviserObject.getName());
+        assertEquals("SurnameReviser", reviserObject.getSurname());
+        assertEquals(35, reviserObject.getAge());
+
         service.createUserAndStore(TEACHER, "NameTeacher", "SurnameTeacher", 30);
-        service.createUserAndStore(STUDENT, "NameStudent", "SurnameStudent", 31);
-        List<Human> expectedList = new ArrayList<>();
-        expectedList.add(new Reviser("NameReviser", "SurnameReviser", 35));
-        expectedList.add(new Teacher("NameTeacher", "SurnameTeacher", 30));
-        expectedList.add(new Student("NameStudent", "SurnameStudent", 31));
-        final var actual = storage.getStorage();
-        //  final var expected = asList(new Reviser("NameReviser","SurnameReviser",35),new Teacher("NameTeacher","SurnameTeacher",30), new Student("NameStudent","SurnameStudent",31));
+        final var teacher = service.getBySurname("SurnameTeacher").get(0);
 
-        assertArrayEquals(expectedList.toArray(), actual.toArray());
+        assertEquals("NameTeacher", teacher.getName());
+        assertEquals("SurnameTeacher", teacher.getSurname());
+        assertEquals(30, teacher.getAge());
+
+        service.createUserAndStore(STUDENT, "NameStudent", "SurnameStudent", 18);
+        final var student = service.getBySurname("SurnameStudent").get(0);
+
+        assertEquals("NameStudent", student.getName());
+        assertEquals("NameStudent", student.getName());
+        assertEquals("SurnameStudent", student.getSurname());
+        assertEquals(18, student.getAge());
     }
 
-    @Test
-    void addTest() {
-        final var reviser = new Reviser("NameReviser", "SurnameReviser", 35);
-        final var actual = storage.getStorage();
-
-        service.add(reviser);
-
-        Assertions.assertEquals(asList(reviser), actual);
-    }
 
     @Test
     void collectByAgeTest() {
-        final var reviser = new Reviser("NameReviser", "SurnameReviser", 30);
-        final var expected = asList(reviser);
 
-        service.add(reviser);
+        service.createUserAndStore(REVISER, "NameReviser", "SurnameReviser", 30);
         final var actual = service.collectByAge(30);
 
-        Assertions.assertEquals(expected, actual);
+        assertNotNull(actual);
+        assertFalse(actual.isEmpty());
+
+        assertEquals("NameReviser", actual.get(0).getName());
+        assertEquals("SurnameReviser", actual.get(0).getSurname());
+        assertEquals(30, actual.get(0).getAge());
     }
 
     @Test
     void getByNameTest() {
-        final var student = new Student("NameReviser", "SurnameReviser", 30);
-        final var expected = asList(student);
 
-        service.add(student);
-        final var actual = service.getByName("NameReviser");
+        service.createUserAndStore(TEACHER, "NameTeacher", "SurnameTeacher", 25);
+        final var actual = service.getByName("NameTeacher");
 
-        Assertions.assertEquals(expected, actual);
+        assertNotNull(actual);
+        assertFalse(actual.isEmpty());
+
+        assertEquals("NameTeacher", actual.get(0).getName());
+        assertEquals("SurnameTeacher", actual.get(0).getSurname());
+        assertEquals(25, actual.get(0).getAge());
     }
 
     @Test
     void getBySurnameTest() {
-        final var teacher = new Teacher("NameReviser", "SurnameReviser", 30);
-        final var expected = asList(teacher);
 
-        service.add(teacher);
-        final var actual = service.getBySurname("SurnameReviser");
+        service.createUserAndStore(TEACHER, "NameTeacher", "SurnameTeacher", 25);
+        final var actual = service.getBySurname("SurnameTeacher");
 
-        Assertions.assertEquals(expected, actual);
+        assertNotNull(actual);
+        assertFalse(actual.isEmpty());
+
+        assertEquals("NameTeacher", actual.get(0).getName());
+        assertEquals("SurnameTeacher", actual.get(0).getSurname());
+        assertEquals(25, actual.get(0).getAge());
     }
 
     @Test
     void printStorageTest() {
-        final var teacher = new Teacher("NameReviser", "SurnameReviser", 30);
-        final var expected = "What is in the storage printStorage method: " + asList(teacher);
 
-        service.add(teacher);
-         final var actual = service.printStorage();
+        service.createUserAndStore(STUDENT, "NameTeacher", "SurnameTeacher", 25);
+        final var actual = service.getBySurname("SurnameTeacher");
 
-        Assertions.assertEquals(expected, actual);
+        assertNotNull(actual);
+        assertFalse(actual.isEmpty());
+        final var expected = "What is in the storage printStorage method: "+ Arrays.asList(new Student("NameTeacher", "SurnameTeacher", 25));
+        final var print =service.printStorage();
+        assertEquals(expected,print);
     }
 
+    @Test
+    void removeBySurnameTest() {
+
+        service.createUserAndStore(STUDENT, "NameTeacher", "SurnameTeacher", 25);
+        final var actual = service.getBySurname("SurnameTeacher");
+
+        assertNotNull(actual);
+        assertFalse(actual.isEmpty());
+
+        service.remove("SurnameTeacher");
+        assertNotNull(actual);
+        service.printStorage();
+        assertFalse(actual.isEmpty());
+        service.printStorage();
+    }
+
+    @Test
+    void updateBySurnameTest() {
+
+        service.createUserAndStore(TEACHER, "NameTeacher", "SurnameTeacher", 25);
+        final var actual = service.getBySurname("SurnameTeacher");
+
+        assertNotNull(actual);
+        assertFalse(actual.isEmpty());
+
+        service.update("SurnameTeacher",new Student("NameStudent", "SurnameStudent", 18));
+
+        final var updatedActual = service.repository.getAll();
+
+        assertNotNull(actual);
+        assertFalse(actual.isEmpty());
+
+        assertEquals("NameStudent",updatedActual.get(0).getName());
+        assertEquals("SurnameStudent",updatedActual.get(0).getSurname());
+        assertEquals(18,updatedActual.get(0).getAge());
+    }
 }

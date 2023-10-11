@@ -5,6 +5,8 @@ import net.education.kyivstar.courseParticipants.Human;
 import net.education.kyivstar.courseParticipants.Reviser;
 import net.education.kyivstar.courseParticipants.Student;
 import net.education.kyivstar.courseParticipants.Teacher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,15 +14,15 @@ import java.util.Random;
 
 import static net.education.kyivstar.Service.UserType.values;
 
-public class Service extends Storage {
+public class Service {
+ private Logger logger = LoggerFactory.getLogger(Service.class);
 
     private final Faker faker;
-    private final Storage store;
     private final Random random;
+    Repository repository = new Repository();
 
-    public Service(Faker faker, Storage storage, Random random) {
+    public Service(Faker faker, Random random) {
         this.faker = faker;
-        this.store = storage;
         this.random = random;
     }
 
@@ -41,19 +43,20 @@ public class Service extends Storage {
     }
 
     public void populateStorage(int numberOfPeople) {
+
         for (int x = 0; x < numberOfPeople; x++) {
             int randomNumber = random.nextInt(values().length);
             UserType randomHuman = UserType.values()[randomNumber];
 
             switch (randomHuman) {
                 case TEACHER:
-                    store.storage.add(new Teacher(randomName(), randomSurname(), randomAgeTeachersAndRevisers()));
+                    repository.add(new Teacher(randomName(), randomSurname(), randomAgeTeachersAndRevisers()));
                     break;
                 case REVISER:
-                    store.storage.add(new Reviser(randomName(), randomSurname(), randomAgeTeachersAndRevisers()));
+                    repository.add(new Reviser(randomName(), randomSurname(), randomAgeTeachersAndRevisers()));
                     break;
                 case STUDENT:
-                    store.storage.add(new Student(randomName(), randomSurname(), randomAge()));
+                    repository.add(new Student(randomName(), randomSurname(), randomAge()));
                     break;
             }
         }
@@ -62,62 +65,58 @@ public class Service extends Storage {
     public void createUserAndStore(UserType userType, String name, String surname, int age) {
 
         switch (userType) {
-            case TEACHER:
-                store.storage.add(new Teacher(name, surname, age));
-                break;
-            case REVISER:
-                store.storage.add(new Reviser(name, surname, age));
-                break;
-            case STUDENT:
-                store.storage.add(new Student(name, surname, age));
-                break;
+            case TEACHER -> repository.add(new Teacher(name, surname, age));
+            case REVISER -> repository.add(new Reviser(name, surname, age));
+            case STUDENT -> repository.add(new Student(name, surname, age));
+            default -> throw new IllegalArgumentException();
         }
-    }
-//storage methods
-
-    public void add(Human human) {
-
-        store.storage.add(human);
     }
 
     public List<Human> collectByAge(int age) {
 
         List<Human> result = new ArrayList<>();
-        for (Human human : store.storage) {
+        for (Human human : repository.getAll()) {
             if (human.getAge() == age) {
                 result.add(human);
             }
         }
+        logger.info("Result of collectByAge "+result);
         return result;
     }
 
     public List<Human> getByName(String name) {
 
         List<Human> result = new ArrayList<>();
-        for (Human human : store.storage) {
+        for (Human human : repository.getAll()) {
             if (human.getName().equals(name)) {
                 result.add(human);
             }
         }
+        logger.info("Result of getByName "+result);
         return result;
+    }
+
+    public void update(String surname, Human humanToReplace){
+        repository.updateBySurname(surname, humanToReplace);
     }
 
     public List<Human> getBySurname(String surname) {
 
         List<Human> result = new ArrayList<>();
-        for (Human human : store.storage) {
+        for (Human human : repository.getAll()) {
             if (human.getSurname().equals(surname)) {
                 result.add(human);
             }
         }
+        logger.info("Result of getBySurname "+result);
         return result;
     }
 
     public String printStorage() {
 
-        System.out.println("What is in the storage printStorage method: " + store.storage);
+        System.out.println("What is in the storage printStorage method: " + repository.getAll());
 
-        return "What is in the storage printStorage method: " + store.storage;
+        return "What is in the storage printStorage method: " + repository.getAll();
     }
 
     public List<String> listsOfNames(List<Human> list) {
@@ -127,10 +126,13 @@ public class Service extends Storage {
         for (Human item : list) {
             listOfNames.add(item.getName());
         }
-        System.out.println("list of names by age: " + listOfNames);
+        logger.info("Result of listsOfNames "+listOfNames);
         return listOfNames;
     }
-    //
+
+    public void remove(String surname){
+        repository.removeBySurname(surname);
+    }
 
     public enum UserType {
         STUDENT,

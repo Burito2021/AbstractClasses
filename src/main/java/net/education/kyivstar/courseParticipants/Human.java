@@ -37,10 +37,8 @@ public abstract class Human {
     }
 
     @Override
-    public String
-
-    toString() {
-        return getClass().getSimpleName() + "{" +
+    public String toString() {
+        return getClass().getSimpleName() +"{" +
                 "name='" + name + '\'' +
                 ", surname='" + surname + '\'' +
                 ", age=" + age +
