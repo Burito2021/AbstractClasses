@@ -19,11 +19,12 @@ public class Service {
 
     private final Faker faker;
     private final Random random;
-    Repository repository = new Repository();
+    public final Repository repository;
 
-    public Service(Faker faker, Random random) {
+    public Service(Faker faker, Random random,Repository repository) {
         this.faker = faker;
         this.random = random;
+        this.repository = repository;
     }
 
     private String randomName() {
@@ -114,7 +115,7 @@ public class Service {
 
     public String printStorage() {
 
-        System.out.println("What is in the storage printStorage method: " + repository.getAll());
+        logger.info("What is in the storage printStorage method: " + repository.getAll());
 
         return "What is in the storage printStorage method: " + repository.getAll();
     }

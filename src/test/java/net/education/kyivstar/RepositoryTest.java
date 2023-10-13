@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class RepositoryTest {
-    Repository repository = new Repository();
+    Repository repository = new Repository(new Storage());
 
     @Test
     void addTest() {
@@ -24,6 +24,8 @@ class RepositoryTest {
         assertEquals("NameReviser", actual.get(0).getName());
         assertEquals("SurnameReviser", actual.get(0).getSurname());
         assertEquals(30, actual.get(0).getAge());
+
+        repository.removeAll();
     }
 
     @Test
@@ -38,6 +40,8 @@ class RepositoryTest {
         final var afterRemove = repository.getAll();
 
         assertTrue(afterRemove.isEmpty());
+
+        repository.removeAll();
     }
 
     @Test
@@ -48,13 +52,15 @@ class RepositoryTest {
         assertNotNull(beforeUpdate);
         assertFalse(beforeUpdate.isEmpty());
 
-        se.updateBySurname("SurnameReviser",new Student("Student", "SurnameStudent", 17));
+        repository.updateBySurname("SurnameReviser",new Student("Student", "SurnameStudent", 17));
         repository.removeBySurname("SurnameReviser");
         final var afterUpdate = repository.getAll().get(0);
 
         assertEquals("Student",afterUpdate.getName());
         assertEquals("SurnameStudent",afterUpdate.getSurname());
         assertEquals(17,afterUpdate.getAge());
+
+        repository.removeAll();
     }
 
     @Test
@@ -68,7 +74,7 @@ class RepositoryTest {
         assertEquals("NameReviser",actual.get(0).getName());
         assertEquals("SurnameReviser",actual.get(0).getSurname());
         assertEquals(30,actual.get(0).getAge());
+
+       repository.removeAll();
     }
-
-
 }

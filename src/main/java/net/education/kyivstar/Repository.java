@@ -7,12 +7,21 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 class Repository {
+    private final Storage data;
     private Logger logger = LoggerFactory.getLogger(Service.class);
-    Storage data = new Storage();
+
+    public Repository(Storage storage) {
+        this.data = storage;
+    }
 
     //  public void add(); remove(); get(), getAll(); update();
     public void add(Human human) {
         data.getStorage().add(human);
+    }
+
+    public void removeAll(){
+        data.getStorage().removeAll(getAll());
+
     }
 
     public void removeBySurname(String surname) {

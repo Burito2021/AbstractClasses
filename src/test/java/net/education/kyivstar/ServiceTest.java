@@ -2,7 +2,6 @@ package net.education.kyivstar;
 
 import com.github.javafaker.Faker;
 import net.education.kyivstar.courseParticipants.Student;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -12,7 +11,7 @@ import static net.education.kyivstar.Service.UserType.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ServiceTest {
-    Service service = new Service(new Faker(), new Random());
+    Service service = new Service(new Faker(), new Random(), new Repository(new Storage()));
 
     @Test
     void populateStorageTest() {
@@ -50,6 +49,8 @@ class ServiceTest {
         assertEquals("NameStudent", student.getName());
         assertEquals("SurnameStudent", student.getSurname());
         assertEquals(18, student.getAge());
+
+        service.repository.removeAll();
     }
 
 
@@ -65,6 +66,8 @@ class ServiceTest {
         assertEquals("NameReviser", actual.get(0).getName());
         assertEquals("SurnameReviser", actual.get(0).getSurname());
         assertEquals(30, actual.get(0).getAge());
+
+        service.repository.removeAll();
     }
 
     @Test
@@ -79,6 +82,8 @@ class ServiceTest {
         assertEquals("NameTeacher", actual.get(0).getName());
         assertEquals("SurnameTeacher", actual.get(0).getSurname());
         assertEquals(25, actual.get(0).getAge());
+
+        service.repository.removeAll();
     }
 
     @Test
@@ -93,6 +98,8 @@ class ServiceTest {
         assertEquals("NameTeacher", actual.get(0).getName());
         assertEquals("SurnameTeacher", actual.get(0).getSurname());
         assertEquals(25, actual.get(0).getAge());
+
+        service.repository.removeAll();
     }
 
     @Test
@@ -103,9 +110,11 @@ class ServiceTest {
 
         assertNotNull(actual);
         assertFalse(actual.isEmpty());
-        final var expected = "What is in the storage printStorage method: "+ Arrays.asList(new Student("NameTeacher", "SurnameTeacher", 25));
-        final var print =service.printStorage();
-        assertEquals(expected,print);
+        final var expected = "What is in the storage printStorage method: " + Arrays.asList(new Student("NameTeacher", "SurnameTeacher", 25));
+        final var print = service.printStorage();
+        assertEquals(expected, print);
+
+        service.repository.removeAll();
     }
 
     @Test
@@ -122,6 +131,8 @@ class ServiceTest {
         service.printStorage();
         assertFalse(actual.isEmpty());
         service.printStorage();
+
+        service.repository.removeAll();
     }
 
     @Test
@@ -133,15 +144,17 @@ class ServiceTest {
         assertNotNull(actual);
         assertFalse(actual.isEmpty());
 
-        service.update("SurnameTeacher",new Student("NameStudent", "SurnameStudent", 18));
+        service.update("SurnameTeacher", new Student("NameStudent", "SurnameStudent", 18));
 
         final var updatedActual = service.repository.getAll();
 
         assertNotNull(actual);
         assertFalse(actual.isEmpty());
 
-        assertEquals("NameStudent",updatedActual.get(0).getName());
-        assertEquals("SurnameStudent",updatedActual.get(0).getSurname());
-        assertEquals(18,updatedActual.get(0).getAge());
+        assertEquals("NameStudent", updatedActual.get(0).getName());
+        assertEquals("SurnameStudent", updatedActual.get(0).getSurname());
+        assertEquals(18, updatedActual.get(0).getAge());
+
+        service.repository.removeAll();
     }
 }
