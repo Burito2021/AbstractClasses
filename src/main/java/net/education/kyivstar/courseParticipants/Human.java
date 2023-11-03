@@ -36,6 +36,9 @@ public abstract class Human {
         this.age = age;
     }
 
+    public String sort() {
+       return getClass().getSimpleName();
+    }
     @Override
     public String toString() {
         return getClass().getSimpleName() +"{" +

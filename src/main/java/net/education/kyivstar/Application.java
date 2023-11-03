@@ -1,38 +1,34 @@
 package net.education.kyivstar;
 
 import com.github.javafaker.Faker;
-import net.education.kyivstar.courseParticipants.Student;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.Random;
 
-import static net.education.kyivstar.Service.UserType.STUDENT;
-import static net.education.kyivstar.Service.UserType.TEACHER;
+import static net.education.kyivstar.UserType.*;
 
 public class Application {
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
 
     public static void main(String[] args) {
+        Storage storage = new Storage();
+        ReviserRepository reviserRepository = new ReviserRepository(storage);
+        StudentRepository studentRepository = new StudentRepository(storage);
+        TeacherRepository teacherRepository = new TeacherRepository(storage);
+        UserService userService = new UserService(new Faker(), new Random(), reviserRepository, studentRepository, teacherRepository);
 
-        Service service = new Service(new Faker(), new Random() ,new Repository(new Storage()));
+        userService.populateStorage(1);
+        userService.createUserAndStore(REVISER, "d1", "lds", 16);
+        userService.createUserAndStore(REVISER, "d1", "lds6", 16);
+        userService.createUserAndStore(REVISER, "d2", "lds1", 16);
+        userService.createUserAndStore(STUDENT, "d2", "lds2", 16);
+        userService.createUserAndStore(TEACHER, "d2", "lds3", 16);
+        userService.createUserAndStore(REVISER, "d3", "lulu", 18);
+        System.out.println("ALL");
+        userService.printStorageAllUsers();
+        userService.replaceUser("lds6",REVISER,"d4","replaced",20);
+        System.out.println("!!!");
+        userService.printStorageAllUsers();
 
-        service.populateStorage(2);
-
-        service.createUserAndStore(STUDENT, "Alex", "Burmistrenko", 30);
-        service.createUserAndStore(TEACHER, "Maxim", "Dzhezhelo", 30);
-
-        logger.info("Get by name method: " + service.getByName("Alex"));
-
-        logger.info("Get by surname method: " + service.getBySurname("Dzhezhelo"));
-        logger.info("List " + service.printStorage());
-        logger.info("Collect by age method: " + service.collectByAge(30));
-        service.remove("Dzhezhelo");
-        service.printStorage();
-
-        logger.info("Burmistrenko", new Student("Burito", "Mohito", 29));
-        service.listsOfNames(service.collectByAge(30));
-
-        service.printStorage();
     }
 }
