@@ -14,7 +14,8 @@ class UserServiceTest {
     ReviserRepository reviserRepository = new ReviserRepository(storage);
     StudentRepository studentRepository = new StudentRepository(storage);
     TeacherRepository teacherRepository = new TeacherRepository(storage);
-    UserService userService = new UserService(faker, random, reviserRepository, studentRepository, teacherRepository);
+    HumanRepository humanRepository = new HumanRepository(storage);
+    UserService userService = new UserService(faker, random, humanRepository, reviserRepository, studentRepository, teacherRepository);
 
 
     @Test

@@ -7,22 +7,21 @@ import net.education.kyivstar.courseParticipants.Student;
 import net.education.kyivstar.courseParticipants.Teacher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static net.education.kyivstar.UserType.values;
 
 public class UserService {
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
-
-
+    private final Faker faker;
+    private final Random random;
     private TeacherRepository teacherRepository;
     private StudentRepository studentRepository;
     private ReviserRepository reviserRepository;
-    private final Faker faker;
-    private final Random random;
+    private HumanRepository humanRepository;
 
     public UserService(Faker faker, Random random, TeacherRepository repository) {
         this.teacherRepository = repository;
@@ -42,16 +41,17 @@ public class UserService {
         this.random = random;
     }
 
-    public UserService(Faker faker, Random random, ReviserRepository repository, StudentRepository studentRepository, TeacherRepository teacherRepository) {
+    public UserService(Faker faker, Random random, HumanRepository humanRepository, ReviserRepository repository, StudentRepository studentRepository, TeacherRepository teacherRepository) {
         this.reviserRepository = repository;
         this.studentRepository = studentRepository;
         this.teacherRepository = teacherRepository;
+        this.humanRepository = humanRepository;
         this.faker = faker;
         this.random = random;
     }
 
     public void createUserAndStore(UserType userType, String name, String surname, int age) {
-        ValidationService.validateCreateAndStoreValidation(name,surname,age);
+        ValidationService.validateCreateAndStoreValidation(name, surname, age);
 
         switch (userType) {
             case TEACHER -> teacherRepository.addTeacher(new Teacher(name, surname, age));
@@ -92,32 +92,20 @@ public class UserService {
                 .extractAllTeachers();
     }
 
-
     public List<Human> collectAllUsers() {
-        final var revisers = reviserRepository.extractAllRevisersStream().map(student -> (Human) student);
-        final var students = studentRepository.extractAllStudentsStream().map(student -> (Human) student);
-        final var teachers = teacherRepository.extractAllTeachersStream().map(student -> (Human) student);
-        return  Stream.concat(Stream.concat(revisers, students), teachers).collect(Collectors.toList());
+        return humanRepository.extractAllUsers();
     }
-
-  /*  public List<Human> collectBySurname(String surname) {
-        ValidationService.validateName(surname);
-        final var revisers = reviserRepository.extractAllRevisersStream().map(student -> (Human) student);
-        final var students = studentRepository.extractAllStudentsStream().map(student -> (Human) student);
-        final var teachers = teacherRepository.extractAllTeachersStream().map(student -> (Human) student);
-        return  Stream.concat(Stream.concat(revisers, students), teachers)
-                .filter(s->s.getSurname().equals(surname)).collect(Collectors.toList()) ;
-    }*/
 
     public List<Human> collectBySurname(String surname) {
         ValidationService.validateName(surname);
-        return  reviserRepository.extractAllUsers()
+        return humanRepository.extractAllUsers()
                 .stream()
-                .filter(s->s.getSurname().equals(surname)).collect(Collectors.toList()) ;
+                .filter(s -> s.getSurname().equals(surname))
+                .collect(Collectors.toList());
     }
 
     public void replaceUser(String surname, UserType type, String name, String surnameToBePlaced, int age) {
-        ValidationService.validateReplaceUser(surname,name,surnameToBePlaced,age);
+        ValidationService.validateReplaceUser(surname, name, surnameToBePlaced, age);
 
         switch (type) {
             case TEACHER -> teacherRepository.updateTeacherBySurname(surname, new Teacher(name, surnameToBePlaced, age));
@@ -129,7 +117,7 @@ public class UserService {
 
     public void removeUser(String surname) {
         ValidationService.validateName(surname);
-        reviserRepository.removeUserBySurname(surname);
+        humanRepository.removeUserBySurname(surname);
     }
 
     public void removeAll() {
@@ -151,8 +139,8 @@ public class UserService {
     }
 
     public String printStudentStorage() {
-     final var text = "What is in the Student storage printStorage method: ";
-        logger.info( text+ studentRepository.extractAllStudents());
+        final var text = "What is in the Student storage printStorage method: ";
+        logger.info(text + studentRepository.extractAllStudents());
 
         return text + studentRepository.extractAllStudents();
     }
