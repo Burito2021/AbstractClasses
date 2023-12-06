@@ -4,8 +4,11 @@ import net.education.kyivstar.courseParticipants.Human;
 import net.education.kyivstar.courseParticipants.Reviser;
 import net.education.kyivstar.courseParticipants.Student;
 import net.education.kyivstar.courseParticipants.Teacher;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.stream.Collectors;
 
 public class Storage {
@@ -27,12 +30,6 @@ public class Storage {
                 .collect(Collectors.toList());
     }
 
-    public List<Human> selectAllRevisersHuman() {
-        return storage.stream()
-                .filter(obj -> obj instanceof Reviser)
-                .collect(Collectors.toList());
-    }
-
     public List<Student> selectAllStudents() {
         return storage
                 .stream()
@@ -49,13 +46,6 @@ public class Storage {
                 .collect(Collectors.toList());
     }
 
-    public List<Human> selectBySurname(String surname) {
-        return  storage
-                .stream()
-                .filter(human -> human.getSurname()
-                        .equals(surname)).collect(Collectors.toList());
-    }
-
     public int selectCount() {
         return storage.size();
     }
@@ -64,8 +54,10 @@ public class Storage {
         storage.add(human);
     }
 
-    public void update(int index, Human replacement) {
-        storage.set(index, replacement);
+    public void update(List<Human> h, Human replacement) {
+        for (Human human:h) {
+            Collections.replaceAll(storage,human,replacement);
+        }
     }
 
     public void deleteAll() {

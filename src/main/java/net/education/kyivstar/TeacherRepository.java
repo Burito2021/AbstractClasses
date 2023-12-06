@@ -4,6 +4,7 @@ import net.education.kyivstar.courseParticipants.Human;
 import net.education.kyivstar.courseParticipants.Teacher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -22,37 +23,25 @@ public class TeacherRepository {
         data.insert(teacher);
     }
 
-    public List<Teacher> extractAllTeachers(){
+    public List<Teacher> extractAllTeachers() {
         return data.selectAll()
                 .stream()
-                .filter(obj->obj instanceof Teacher)
+                .filter(obj -> obj instanceof Teacher)
                 .map(human -> (Teacher) human)
                 .collect(Collectors.toList());
     }
 
-    public Stream<Teacher> extractAllTeachersStream(){
-        return data.selectAll()
-                .stream()
-                .filter(obj->obj instanceof Teacher)
-                .map(human -> (Teacher) human);
-    }
-
     public void updateTeacherBySurname(String surname, Teacher humanToReplaceWith) {
-        IntStream.range(0, data.selectCount())
-                .filter(n -> data.selectAll()
-                        .get(n)
-                        instanceof Teacher)
-                .filter(n -> data.selectAll()
-                        .get(n)
-                        .getSurname()
-                        .equals(surname))
-                .forEach(b -> data.update(b, humanToReplaceWith));
+        List<Human> humans = data.selectAllTeachers()
+                .stream()
+                .filter(human -> human.getSurname().equals(surname)).collect(Collectors.toList());
+        data.update(humans,humanToReplaceWith);
     }
 
     public void removeTeacherBySurname(String surname) {
-        List <Human> list = data.selectAllTeachers()
+        List<Human> list = data.selectAllTeachers()
                 .stream()
-                .filter(s->s.getSurname()
+                .filter(s -> s.getSurname()
                         .equals(surname))
                 .collect(Collectors.toList());
         data.deleteBySurname(list);

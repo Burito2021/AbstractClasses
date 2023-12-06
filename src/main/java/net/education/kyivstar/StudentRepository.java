@@ -4,6 +4,7 @@ import net.education.kyivstar.courseParticipants.Human;
 import net.education.kyivstar.courseParticipants.Student;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -26,32 +27,20 @@ public class StudentRepository {
         return data.selectAllStudents();
     }
 
-    public Stream<Student> extractAllStudentsStream() {
-        return data.selectAll()
+    public void updateStudentBySurname(String surname, Student humanToReplaceWith) {
+        List<Human> humans = data.selectAllStudents()
                 .stream()
-                .filter(obj -> obj instanceof Student)
-                .map(human -> (Student) human);
+                .filter(human -> human.getSurname().equals(surname)).collect(Collectors.toList());
+        data.update(humans,humanToReplaceWith);
     }
 
-    public void updateStudentBySurname(String surname, Student humanToReplaceWith) {
-            IntStream.range(0, data.selectCount())
-                    .filter(n -> data.selectAll()
-                            .get(n)
-                            instanceof Student)
-                    .filter(n -> data.selectAll()
-                            .get(n)
-                            .getSurname()
-                            .equals(surname))
-                    .forEach(b -> data.update(b, humanToReplaceWith));
-        }
-
     public void removeStudentBySurname(String surname) {
-        List <Human> list = data.selectAllStudents()
+        List<Human> list = data.selectAllStudents()
                 .stream()
-                .filter(s->s.getSurname()
+                .filter(s -> s.getSurname()
                         .equals(surname))
                 .collect(Collectors.toList());
         data.deleteBySurname(list);
     }
-    }
+}
 

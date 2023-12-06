@@ -16,20 +16,20 @@ public abstract class Human {
         return name;
     }
 
-    public String getSurname() {
-        return surname;
-    }
-
-    public int getAge() {
-        return age;
-    }
-
     public void setName(String name) {
         this.name = name;
     }
 
+    public String getSurname() {
+        return surname;
+    }
+
     public void setSurname(String surname) {
         this.surname = surname;
+    }
+
+    public int getAge() {
+        return age;
     }
 
     public void setAge(int age) {
@@ -37,11 +37,12 @@ public abstract class Human {
     }
 
     public String sort() {
-       return getClass().getSimpleName();
+        return getClass().getSimpleName();
     }
+
     @Override
     public String toString() {
-        return getClass().getSimpleName() +"{" +
+        return getClass().getSimpleName() + "{" +
                 "name='" + name + '\'' +
                 ", surname='" + surname + '\'' +
                 ", age=" + age +
