@@ -1,68 +1,70 @@
 package net.education.kyivstar;
 
 import net.education.kyivstar.courseParticipants.Human;
+import net.education.kyivstar.courseParticipants.Reviser;
+import net.education.kyivstar.courseParticipants.Student;
+import net.education.kyivstar.courseParticipants.Teacher;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.stream.Collectors;
 
 public class Storage {
 
-    private static List<Human> storage;
+    private final List<Human> storage;
 
     public Storage() {
         this.storage = new ArrayList<>();
     }
 
-    public static void add(Human human) {
+    public List<Human> selectAll() {
+        return storage;
+    }
 
+    public List<Reviser> selectAllRevisers() {
+        return storage.stream()
+                .filter(obj -> obj instanceof Reviser)
+                .map(human -> (Reviser) human)
+                .collect(Collectors.toList());
+    }
+
+    public List<Student> selectAllStudents() {
+        return storage
+                .stream()
+                .filter(obj -> obj instanceof Student)
+                .map(human -> (Student) human)
+                .collect(Collectors.toList());
+    }
+
+    public List<Teacher> selectAllTeachers() {
+        return storage
+                .stream()
+                .filter(obj -> obj instanceof Teacher)
+                .map(human -> (Teacher) human)
+                .collect(Collectors.toList());
+    }
+
+    public int selectCount() {
+        return storage.size();
+    }
+
+    public void insert(Human human) {
         storage.add(human);
     }
 
-    public static List<Human> collectByAge(int age) {
-
-        List<Human> result = new ArrayList<>();
-        for (Human human : storage) {
-            if (human.getAge() == age) {
-                result.add(human);
-            }
+    public void update(List<Human> h, Human replacement) {
+        for (Human human:h) {
+            Collections.replaceAll(storage,human,replacement);
         }
-        return result;
     }
 
-    public static List<Human> getByName(String name) {
-
-        List<Human> result = new ArrayList<>();
-        for (Human human : storage) {
-            if (human.getName() == name) {
-                result.add(human);
-            }
-        }
-        return result;
+    public void deleteAll() {
+        storage.clear();
     }
 
-    public static List<Human> getBySurname(String surname) {
-
-        List<Human> result = new ArrayList<>();
-        for (Human human : storage) {
-            if (human.getSurname() == surname) {
-                result.add(human);
-            }
-        }
-        return result;
-    }
-
-    public static void printStorage() {
-        System.out.println("What is in the storage printStorage method: " + storage);
-    }
-
-    public static List<String> listsOfNames(List<Human> list) {
-
-        List<String> listOfNames = new ArrayList<>();
-
-        for (Human item : list) {
-            listOfNames.add(item.getName());
-        }
-        System.out.println("list of names by age: " + listOfNames);
-        return listOfNames;
+    public void deleteBySurname(List<Human> list) {
+        storage.removeAll(list);
     }
 }
