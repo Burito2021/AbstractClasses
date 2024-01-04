@@ -1,67 +1,42 @@
 package net.education.kyivstar;
 
 import com.github.javafaker.Faker;
-import net.education.kyivstar.courseParticipants.Human;
-import net.education.kyivstar.courseParticipants.Reviser;
-import net.education.kyivstar.courseParticipants.Student;
-import net.education.kyivstar.courseParticipants.Teacher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 import static net.education.kyivstar.UserType.values;
 
 public class UserService {
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
-    private final Faker faker;
-    private final Random random;
-    private TeacherRepository teacherRepository;
-    private StudentRepository studentRepository;
-    private ReviserRepository reviserRepository;
-    private HumanRepository humanRepository;
+    final Faker faker = new Faker();
+    final Random random = new Random();
 
-    public UserService(Faker faker, Random random, TeacherRepository repository) {
-        this.teacherRepository = repository;
-        this.faker = faker;
-        this.random = random;
+    private HumanRepository humanRepository = new HumanRepository();
+    private ReviserRepository reviserRepository = new ReviserRepository();
+    private StudentRepository studentRepository = new StudentRepository();
+    private TeacherRepository teacherRepository = new TeacherRepository();
+
+    public UserService() {
     }
 
-    public UserService(Faker faker, Random random, StudentRepository repository) {
-        this.studentRepository = repository;
-        this.faker = faker;
-        this.random = random;
-    }
 
-    public UserService(Faker faker, Random random, ReviserRepository repository) {
-        this.reviserRepository = repository;
-        this.faker = faker;
-        this.random = random;
-    }
-
-    public UserService(Faker faker, Random random, HumanRepository humanRepository, ReviserRepository repository, StudentRepository studentRepository, TeacherRepository teacherRepository) {
-        this.reviserRepository = repository;
-        this.studentRepository = studentRepository;
-        this.teacherRepository = teacherRepository;
-        this.humanRepository = humanRepository;
-        this.faker = faker;
-        this.random = random;
-    }
-
-    public void createUserAndStore(UserType userType, String name, String surname, int age) {
+    public void createUserAndStore(UserType userType, String surname, String name, int age) throws SQLException {
         ValidationService.validateCreateAndStoreValidation(name, surname, age);
 
         switch (userType) {
-            case TEACHER -> teacherRepository.addTeacher(new Teacher(name, surname, age));
-            case REVISER -> reviserRepository.addReviser(new Reviser(name, surname, age));
-            case STUDENT -> studentRepository.addStudent(new Student(name, surname, age));
+            case TEACHER -> teacherRepository.addTeacher(surname, name, age);
+            case REVISER -> reviserRepository.addReviser(surname, name, age);
+            case STUDENT -> studentRepository.addStudent(surname, name, age);
             default -> throw new IllegalArgumentException();
         }
     }
 
-    public void populateStorage(int numberOfPeople) {
+    public void populateStorage(int numberOfPeople) throws SQLException {
         ValidationService.validateNumber(numberOfPeople);
 
         for (int x = 0; x < numberOfPeople; x++) {
@@ -69,59 +44,115 @@ public class UserService {
             UserType randomHuman = UserType.values()[randomNumber];
 
             switch (randomHuman) {
-                case TEACHER -> teacherRepository.addTeacher(new Teacher(randomName(), randomSurname(), randomAgeTeachersAndRevisers()));
-                case REVISER -> reviserRepository.addReviser(new Reviser(randomName(), randomSurname(), randomAgeTeachersAndRevisers()));
-                case STUDENT -> studentRepository.addStudent(new Student(randomName(), randomSurname(), randomAge()));
+                case TEACHER -> teacherRepository.addTeacher(randomName(), randomSurname(), randomAgeTeachersAndRevisers());
+                case REVISER -> reviserRepository.addReviser(randomName(), randomSurname(), randomAgeTeachersAndRevisers());
+                case STUDENT -> studentRepository.addStudent(randomName(), randomSurname(), randomAge());
                 default -> throw new IllegalArgumentException("Unexpected value: " + randomHuman);
             }
         }
     }
 
-    public List<Reviser> collectRevisers() {
+    public List<Object> collectRevisers() throws SQLException {
         return reviserRepository
                 .extractAllRevisers();
     }
 
-    public List<Student> collectStudents() {
+    public List<Object> collectStudents() throws SQLException {
         return studentRepository
                 .extractAllStudents();
     }
 
-    public List<Teacher> collectTeachers() {
+    public List<Object> collectTeachers() throws SQLException {
         return teacherRepository
                 .extractAllTeachers();
     }
 
-    public List<Human> collectAllUsers() {
-        return humanRepository.extractAllUsers();
+    public List<Object> collectAllUsers() {
+        List<Object> list = null;
+        try {
+            list = humanRepository.extractAllUsers();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 
-    public List<Human> collectBySurname(String surname) {
+    public List<Object> collectReviserBySurname(String surname) {
+        List<Object> list = null;
+        try {
+            list = reviserRepository.extractRevisersBySurname(surname);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public List<Object> collectStudentsBySurname(String surname) {
+        List<Object> list = null;
+        try {
+            list = studentRepository.extractStudentsBySurname(surname);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public List<Object> collectTeachersBySurname(String surname) {
+        List<Object> list = null;
+        try {
+            list = teacherRepository.extractTeacherBySurname(surname);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public HashMap<String, Integer> countUsersByCategory() {
+        HashMap<String, Integer> list = null;
+        try {
+            list = humanRepository.countUsersByCategory();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public HashMap<String, Integer> countAllUsers() {
+        HashMap<String, Integer> list = null;
+        try {
+            list = humanRepository.countUsersByCategory();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+
+    public List<Object> collectBySurname(String surname) throws SQLException {
         ValidationService.validateName(surname);
-        return humanRepository.extractAllUsers()
-                .stream()
-                .filter(s -> s.getSurname().equals(surname))
-                .collect(Collectors.toList());
+        return humanRepository.extractBySurname(surname);
     }
 
-    public void replaceUser(String surname, UserType type, String name, String surnameToBePlaced, int age) {
+    public void replaceUser(String surname, UserType type, String name, String surnameToBePlaced, int age) throws SQLException {
         ValidationService.validateReplaceUser(surname, name, surnameToBePlaced, age);
 
         switch (type) {
-            case TEACHER -> teacherRepository.updateTeacherBySurname(surname, new Teacher(name, surnameToBePlaced, age));
-            case STUDENT -> studentRepository.updateStudentBySurname(surname, new Student(name, surnameToBePlaced, age));
-            case REVISER -> reviserRepository.updateReviserBySurname(surname, new Reviser(name, surnameToBePlaced, age));
+            case TEACHER -> teacherRepository.updateTeacherBySurname(surname, surnameToBePlaced, name, age);
+            case STUDENT -> studentRepository.updateStudentBySurname(surname, surnameToBePlaced, name, age);
+            case REVISER -> reviserRepository.updateReviserBySurname(surname, surnameToBePlaced, name, age);
             default -> throw new IllegalArgumentException("Unexpected value: " + type);
         }
     }
 
-    public void removeUser(String surname) {
+    public void removeUser(String surname, String name) throws SQLException {
         ValidationService.validateName(surname);
-        humanRepository.removeUserBySurname(surname);
+        ValidationService.validateName(name);
+
+        humanRepository.removeUserBySurname(surname, name);
     }
 
-    public void removeAll() {
-        reviserRepository.removeAll();
+    public void removeAll() throws SQLException {
+        humanRepository.removeAll();
     }
 
     public String printStorageAllUsers() {
@@ -131,21 +162,21 @@ public class UserService {
         return text + collectAllUsers();
     }
 
-    public String printReviserStorage() {
+    public String printReviserStorage() throws SQLException {
         final var text = "What is in the Reviser storage printStorage method: ";
         logger.info(text + reviserRepository.extractAllRevisers());
 
         return text + reviserRepository.extractAllRevisers();
     }
 
-    public String printStudentStorage() {
+    public String printStudentStorage() throws SQLException {
         final var text = "What is in the Student storage printStorage method: ";
         logger.info(text + studentRepository.extractAllStudents());
 
         return text + studentRepository.extractAllStudents();
     }
 
-    public String printTeacherStorage() {
+    public String printTeacherStorage() throws SQLException {
         final var text = "What is in the Teacher storage printStorage method: ";
         logger.info(text + teacherRepository.extractAllTeachers());
 

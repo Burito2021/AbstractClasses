@@ -1,10 +1,5 @@
 package net.education.kyivstar.premises;
 
-import net.education.kyivstar.courseParticipants.Reviser;
-
-import java.util.ArrayList;
-import java.util.List;
-
 public class HumanService<Human> {
  /*   private List<Human> students;
     private List<Human> revisers;
@@ -123,7 +118,7 @@ public class HumanService<Human> {
         System.out.println(listOfRevisers);
     }*/
 
-    }
+}
 
 
 

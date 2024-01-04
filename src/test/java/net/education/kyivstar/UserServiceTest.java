@@ -2,213 +2,263 @@ package net.education.kyivstar;
 
 import com.github.javafaker.Faker;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.sql.SQLException;
 import java.util.Random;
+
+import static java.util.Arrays.asList;
+import static net.education.kyivstar.Names.*;
 import static net.education.kyivstar.UserType.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
 class UserServiceTest {
     Faker faker = new Faker();
     Random random = new Random();
-    Storage storage = new Storage();
-    ReviserRepository reviserRepository = new ReviserRepository(storage);
-    StudentRepository studentRepository = new StudentRepository(storage);
-    TeacherRepository teacherRepository = new TeacherRepository(storage);
-    HumanRepository humanRepository = new HumanRepository(storage);
-    UserService userService = new UserService(faker, random, humanRepository, reviserRepository, studentRepository, teacherRepository);
+    DbConnector db = new DbConnector();
 
+    ReviserRepository reviserRepository = new ReviserRepository();
+    StudentRepository studentRepository = new StudentRepository();
+    TeacherRepository teacherRepository = new TeacherRepository();
+    UserService userService = new UserService();
 
-    @Test
-    void populateStorageTest() {
-        userService.populateStorage(5);
-        final var list = userService.collectAllUsers();
-        Assertions.assertEquals(5, list.size());
-        Assertions.assertNotNull(list.get(0));
-        Assertions.assertNotNull(list.get(1));
-        Assertions.assertNotNull(list.get(2));
-        Assertions.assertNotNull(list.get(3));
-        Assertions.assertNotNull(list.get(4));
+    @BeforeEach
+    void cleanDb() throws SQLException {
+        userService.removeAll();
     }
 
     @Test
-    void createUserAndStoreTest() {
+    void test() throws SQLException {
+        final var students = studentRepository.extractAllStudents();
+        System.out.println(students);
+        studentRepository.addStudent("ddas", "asd", 21);
+    }
+
+
+    @Test
+    void populateStorageTest() throws SQLException {
+        userService.populateStorage(5);
+        final var list = userService.countUsersByCategory();
+
+        assertNotNull(list.get(REVISERS));
+        assertNotNull(list.get(STUDENTS));
+        assertNotNull(list.get(TEACHERS));
+
+        final var count1 = list.get(REVISERS);
+        final var count2 = list.get(STUDENTS);
+        final var count3 = list.get(TEACHERS);
+        final var countAll = count1 + count2 + count3;
+
+        assertEquals(5, countAll);
+    }
+
+    @Test
+    void collectRevisersTest() throws SQLException {
+        userService.createUserAndStore(REVISER, "SurnameReviser1", "NameReviser1", 21);
+        userService.createUserAndStore(REVISER, "SurnameReviser2", "NameReviser2", 29);
+        userService.createUserAndStore(TEACHER, "SurnameTeacher", "NameTeacher", 30);
+        userService.createUserAndStore(STUDENT, "SurnameStudent", "NameStudent", 18);
+
+        final var revisers = userService.collectRevisers();
+        final var countOfRevisers = userService.countUsersByCategory().get(REVISERS);
+
+        assertEquals(2, countOfRevisers);
+        assertEquals(asList("SurnameReviser1", "NameReviser1", 21, "SurnameReviser2", "NameReviser2", 29), revisers);
+    }
+
+    @Test
+    void collectRevisersBySurname() throws SQLException {
+        userService.createUserAndStore(REVISER, "SurnameReviser1", "NameReviser1", 21);
+        userService.createUserAndStore(REVISER, "SurnameReviser2", "NameReviser2", 29);
+        userService.createUserAndStore(TEACHER, "SurnameTeacher", "NameTeacher", 30);
+        userService.createUserAndStore(STUDENT, "SurnameStudent", "NameStudent", 18);
+
+        final var countOfRevisers = userService.countUsersByCategory().get(REVISERS);
+
+        assertEquals(2, countOfRevisers);
+        assertEquals(asList("SurnameReviser1", "NameReviser1", 21), userService.collectReviserBySurname("SurnameReviser1"));
+        assertEquals(asList("SurnameReviser2", "NameReviser2", 29), userService.collectReviserBySurname("SurnameReviser2"));
+    }
+
+    @Test
+    void collectStudentsBySurname() throws SQLException {
+        userService.createUserAndStore(REVISER, "SurnameReviser1", "NameReviser1", 21);
+        userService.createUserAndStore(REVISER, "SurnameReviser2", "NameReviser2", 29);
+        userService.createUserAndStore(TEACHER, "SurnameTeacher", "NameTeacher", 30);
+        userService.createUserAndStore(STUDENT, "SurnameStudent", "NameStudent", 18);
+
+        final var countOfStudents = userService.countUsersByCategory().get(STUDENTS);
+        final var student = userService.collectStudentsBySurname("SurnameStudent");
+        assertNotNull(student);
+        assertEquals(1, countOfStudents);
+        assertEquals(asList("SurnameStudent", "NameStudent", 18), student);
+    }
+
+    @Test
+    void collectTeachersBySurname() throws SQLException {
+        userService.createUserAndStore(REVISER, "SurnameReviser1", "NameReviser1", 21);
+        userService.createUserAndStore(REVISER, "SurnameReviser2", "NameReviser2", 29);
+        userService.createUserAndStore(TEACHER, "SurnameTeacher", "NameTeacher", 30);
+        userService.createUserAndStore(TEACHER, "SurnameTeacher2", "NameTeacher2", 32);
+        userService.createUserAndStore(STUDENT, "SurnameStudent", "NameStudent", 18);
+
+        final var countOfRevisers = userService.countUsersByCategory().get(TEACHERS);
+
+        assertNotNull(countOfRevisers);
+        assertEquals(2, countOfRevisers);
+
+        final var teacher1 = userService.collectTeachersBySurname("SurnameTeacher");
+        final var teacher2 = userService.collectTeachersBySurname("SurnameTeacher2");
+        assertNotNull(teacher1);
+        assertNotNull(teacher2);
+        assertEquals(asList("SurnameTeacher", "NameTeacher", 30),teacher1);
+        assertEquals(asList("SurnameTeacher2", "NameTeacher2", 32), teacher2);
+    }
+
+    @Test
+    void createUserAndStoreTest() throws SQLException {
         userService.createUserAndStore(STUDENT, "Student", "Studenti", 18);
         userService.createUserAndStore(TEACHER, "Teacher", "Teacheri", 40);
         userService.createUserAndStore(REVISER, "Reviser", "Reviseri", 29);
-        final var studentList = userService.collectBySurname("Studenti");
-        final var student = studentList.get(0);
-        Assertions.assertNotNull(student);
-        Assertions.assertFalse(studentList.isEmpty());
 
-        Assertions.assertEquals("Student", student.getName());
-        Assertions.assertEquals("Studenti", student.getSurname());
-        Assertions.assertEquals(18, student.getAge());
+        final var revisers = userService.collectRevisers();
+        final var students = userService.collectStudents();
+        final var teachers = userService.collectTeachers();
 
-        final var teacherList = userService.collectBySurname("Teacheri");
-        final var teacher = teacherList.get(0);
-        Assertions.assertNotNull(teacher);
-        Assertions.assertFalse(teacherList.isEmpty());
+        assertNotNull(revisers);
+        assertNotNull(students);
+        assertNotNull(teachers);
 
-        Assertions.assertEquals("Teacher", teacher.getName());
-        Assertions.assertEquals("Teacheri", teacher.getSurname());
-        Assertions.assertEquals(40, teacher.getAge());
+        final var revisersCount = userService.countUsersByCategory().get(REVISERS);
+        final var studentCount = userService.countUsersByCategory().get(STUDENTS);
+        final var teacherCount = userService.countUsersByCategory().get(TEACHERS);
 
-        final var reviserList = userService.collectBySurname("Reviseri");
-        final var reviser = reviserList.get(0);
-        Assertions.assertNotNull(reviser);
-        Assertions.assertFalse(reviserList.isEmpty());
+        assertEquals(1, revisersCount);
+        assertEquals(1, studentCount);
+        assertEquals(1, teacherCount);
 
-        Assertions.assertEquals("Reviser", reviser.getName());
-        Assertions.assertEquals("Reviseri", reviser.getSurname());
-        Assertions.assertEquals(29, reviser.getAge());
+        assertEquals(asList("Reviser", "Reviseri", 29), revisers);
+
+        assertEquals(asList("Student", "Studenti", 18), students);
+
+        assertEquals(asList("Teacher", "Teacheri", 40), teachers);
     }
 
     @Test
-    void collectRevisersTest() {
-        userService.createUserAndStore(REVISER, "NameReviser1", "SurnameReviser1", 21);
-        userService.createUserAndStore(REVISER, "NameReviser2", "SurnameReviser2", 29);
-        userService.createUserAndStore(TEACHER, "NameTeacher", "SurnameTeacher", 30);
-        userService.createUserAndStore(STUDENT, "NameStudent", "SurnameStudent", 18);
+    void collectStudentsTest() throws SQLException {
+        userService.createUserAndStore(REVISER, "SurnameReviser1", "NameReviser1", 21);
+        userService.createUserAndStore(REVISER, "SurnameReviser2", "NameReviser2", 29);
+        userService.createUserAndStore(TEACHER, "SurnameTeacher", "NameTeacher", 30);
+        userService.createUserAndStore(STUDENT, "SurnameStudent1", "NameStudent1", 18);
+        userService.createUserAndStore(STUDENT, "SurnameStudent2", "NameStudent2", 21);
+        userService.createUserAndStore(STUDENT, "SurnameStudent3", "NameStudent3", 23);
 
-        final var listOfRevisers = userService.collectRevisers();
+        final var students = userService.collectStudents();
+        final var countOfStudents = userService.countUsersByCategory().get(STUDENTS);
 
-        Assertions.assertEquals(2, listOfRevisers.stream().count());
-        Assertions.assertEquals("NameReviser1", listOfRevisers.get(0).getName());
-        Assertions.assertEquals("SurnameReviser1", listOfRevisers.get(0).getSurname());
-        Assertions.assertEquals(21, listOfRevisers.get(0).getAge());
-        Assertions.assertEquals("NameReviser2", listOfRevisers.get(1).getName());
-        Assertions.assertEquals("SurnameReviser2", listOfRevisers.get(1).getSurname());
-        Assertions.assertEquals(29, listOfRevisers.get(1).getAge());
+        assertEquals(3, countOfStudents);
+        assertEquals(asList("SurnameStudent1", "NameStudent1", 18, "SurnameStudent2", "NameStudent2", 21, "SurnameStudent3", "NameStudent3", 23), students);
     }
 
     @Test
-    void collectStudentsTest() {
-        userService.createUserAndStore(REVISER, "NameReviser1", "SurnameReviser1", 21);
-        userService.createUserAndStore(REVISER, "NameReviser2", "SurnameReviser2", 29);
-        userService.createUserAndStore(TEACHER, "NameTeacher", "SurnameTeacher", 30);
-        userService.createUserAndStore(STUDENT, "NameStudent1", "SurnameStudent1", 18);
-        userService.createUserAndStore(STUDENT, "NameStudent2", "SurnameStudent2", 21);
-        final var listOfStudents = userService.collectStudents();
+    void collectTeachersTest() throws SQLException {
+        userService.createUserAndStore(REVISER, "SurnameReviser1", "NameReviser1", 21);
+        userService.createUserAndStore(REVISER, "SurnameReviser2", "NameReviser2", 29);
+        userService.createUserAndStore(TEACHER, "SurnameTeacher", "NameTeacher", 30);
+        userService.createUserAndStore(STUDENT, "SurnameStudent1", "NameStudent1", 18);
+        userService.createUserAndStore(STUDENT, "SurnameStudent2", "NameStudent2", 21);
+        userService.createUserAndStore(STUDENT, "SurnameStudent3", "NameStudent3", 23);
 
-        Assertions.assertEquals(2, listOfStudents.stream().count());
-        Assertions.assertEquals("NameStudent1", listOfStudents.get(0).getName());
-        Assertions.assertEquals("SurnameStudent1", listOfStudents.get(0).getSurname());
-        Assertions.assertEquals(18, listOfStudents.get(0).getAge());
-        Assertions.assertEquals("NameStudent2", listOfStudents.get(1).getName());
-        Assertions.assertEquals("SurnameStudent2", listOfStudents.get(1).getSurname());
-        Assertions.assertEquals(21, listOfStudents.get(1).getAge());
+        final var teachers = userService.collectTeachers();
+        final var countOfTeachers = userService.countUsersByCategory().get(TEACHERS);
+
+        assertEquals(1, countOfTeachers);
+        assertEquals(asList("SurnameTeacher", "NameTeacher", 30), teachers);
     }
 
     @Test
-    void collectTeachersTest() {
-        userService.createUserAndStore(TEACHER, "NameTeacher1", "SurnameTeacher1", 21);
-        userService.createUserAndStore(TEACHER, "NameTeacher2", "SurnameTeacher2", 29);
-        userService.createUserAndStore(REVISER, "NameReviser", "SurnameReviser", 30);
-        userService.createUserAndStore(STUDENT, "NameStudent1", "SurnameStudent1", 18);
-        userService.createUserAndStore(STUDENT, "NameStudent2", "SurnameStudent2", 21);
-        final var listOfStudents = userService.collectTeachers();
-
-        Assertions.assertEquals(2, listOfStudents.stream().count());
-        Assertions.assertEquals("NameTeacher1", listOfStudents.get(0).getName());
-        Assertions.assertEquals("SurnameTeacher1", listOfStudents.get(0).getSurname());
-        Assertions.assertEquals(21, listOfStudents.get(0).getAge());
-        Assertions.assertEquals("NameTeacher2", listOfStudents.get(1).getName());
-        Assertions.assertEquals("SurnameTeacher2", listOfStudents.get(1).getSurname());
-        Assertions.assertEquals(29, listOfStudents.get(1).getAge());
-    }
-
-    @Test
-    void collectAllUsersTest() {
-        userService.createUserAndStore(REVISER, "NameReviser", "SurnameReviser", 30);
-        userService.createUserAndStore(STUDENT, "NameStudent1", "SurnameStudent1", 18);
-        userService.createUserAndStore(STUDENT, "NameStudent2", "SurnameStudent2", 21);
-        userService.createUserAndStore(TEACHER, "NameTeacher1", "SurnameTeacher1", 21);
-        userService.createUserAndStore(TEACHER, "NameTeacher2", "SurnameTeacher2", 29);
+    void collectAllUsersTest() throws SQLException {
+        userService.createUserAndStore(REVISER, "SurnameReviser1", "NameReviser1", 21);
+        userService.createUserAndStore(REVISER, "SurnameReviser2", "NameReviser2", 29);
+        userService.createUserAndStore(TEACHER, "SurnameTeacher", "NameTeacher", 30);
+        userService.createUserAndStore(STUDENT, "SurnameStudent1", "NameStudent1", 18);
+        userService.createUserAndStore(STUDENT, "SurnameStudent2", "NameStudent2", 21);
+        userService.createUserAndStore(STUDENT, "SurnameStudent3", "NameStudent3", 23);
 
         final var list = userService.collectAllUsers();
 
-        Assertions.assertEquals(5, list.stream().count());
-        Assertions.assertEquals("NameReviser", list.get(0).getName());
-        Assertions.assertEquals("SurnameReviser", list.get(0).getSurname());
-        Assertions.assertEquals(30, list.get(0).getAge());
+        assertNotNull(list);
 
-        Assertions.assertEquals("NameStudent1", list.get(1).getName());
-        Assertions.assertEquals("SurnameStudent1", list.get(1).getSurname());
-        Assertions.assertEquals(18, list.get(1).getAge());
-
-        Assertions.assertEquals("NameStudent2", list.get(2).getName());
-        Assertions.assertEquals("SurnameStudent2", list.get(2).getSurname());
-        Assertions.assertEquals(21, list.get(2).getAge());
-
-        Assertions.assertEquals("NameTeacher1", list.get(3).getName());
-        Assertions.assertEquals("SurnameTeacher1", list.get(3).getSurname());
-        Assertions.assertEquals(21, list.get(3).getAge());
-
-        Assertions.assertEquals("NameTeacher2", list.get(4).getName());
-        Assertions.assertEquals("SurnameTeacher2", list.get(4).getSurname());
-        Assertions.assertEquals(29, list.get(4).getAge());
+        assertEquals(asList("SurnameReviser1", "NameReviser1", 21, "SurnameReviser2", "NameReviser2", 29,
+                "SurnameTeacher", "NameTeacher", 30, "SurnameStudent1", "NameStudent1", 18,
+                "SurnameStudent2", "NameStudent2", 21, "SurnameStudent3", "NameStudent3", 23), list);
     }
 
     @Test
-    void collectBySurnameTest() {
-        userService.createUserAndStore(REVISER, "NameReviser", "SurnameReviser", 30);
-        userService.createUserAndStore(STUDENT, "NameStudent1", "SurnameStudent1", 18);
-        userService.createUserAndStore(STUDENT, "NameStudent2", "SurnameStudent2", 21);
-        userService.createUserAndStore(TEACHER, "NameTeacher1", "SurnameTeacher1", 21);
-        userService.createUserAndStore(TEACHER, "NameTeacher2", "SurnameTeacher2", 29);
+    void collectBySurnameTest() throws SQLException {
+        userService.createUserAndStore(REVISER, "SurnameReviser", "NameReviser", 30);
+        userService.createUserAndStore(STUDENT, "SurnameStudent1", "NameStudent1", 18);
+        userService.createUserAndStore(TEACHER, "SurnameTeacher1", "NameTeacher1", 21);
 
-        final var list = userService.collectBySurname("SurnameTeacher2").get(0);
 
-        Assertions.assertEquals("NameTeacher2", list.getName());
-        Assertions.assertEquals("SurnameTeacher2", list.getSurname());
-        Assertions.assertEquals(29, list.getAge());
+        final var reviser = userService.collectBySurname("SurnameReviser");
+        final var student = userService.collectBySurname("SurnameStudent1");
+        final var teacher = userService.collectBySurname("SurnameTeacher1");
+
+        assertNotNull(reviser);
+        assertNotNull(student);
+        assertNotNull(teacher);
+
+        assertEquals(asList("SurnameReviser", "NameReviser", 30), reviser);
+        assertEquals(asList("SurnameStudent1", "NameStudent1", 18), student);
+        assertEquals(asList("SurnameTeacher1", "NameTeacher1", 21), teacher);
     }
 
     @Test
-    void replaceUserTest() {
-        userService.createUserAndStore(REVISER, "NameReviser", "SurnameReviser", 30);
-        userService.createUserAndStore(STUDENT, "NameStudent1", "SurnameStudent1", 18);
-        userService.createUserAndStore(STUDENT, "NameStudent2", "SurnameStudent2", 21);
-        userService.createUserAndStore(TEACHER, "NameTeacher1", "SurnameTeacher1", 21);
-        userService.createUserAndStore(TEACHER, "NameTeacher2", "SurnameTeacher2", 29);
+    void replaceUserTest() throws SQLException {
+        userService.createUserAndStore(REVISER, "SurnameReviser", "NameReviser", 30);
+        userService.createUserAndStore(STUDENT, "SurnameStudent1", "NameStudent1", 18);
+        userService.createUserAndStore(STUDENT, "SurnameStudent2", "NameStudent2", 21);
+        userService.createUserAndStore(TEACHER, "SurnameTeacher1", "NameTeacher1", 21);
+        userService.createUserAndStore(TEACHER, "SurnameTeacher2", "NameTeacher2", 29);
 
-        userService.replaceUser("SurnameStudent1", STUDENT, "ReplaceName", "ReplaceSurname", 18);
+        userService.replaceUser("SurnameReviser", REVISER, "ReplaceNameReviser", "ReplaceSurnameReviser", 48);
+        final var replacedReviser = userService.collectBySurname("ReplaceSurnameReviser");
+        Assertions.assertEquals(asList("ReplaceSurnameReviser", "ReplaceNameReviser", 48), replacedReviser);
 
-        final var replacedUser = userService.collectBySurname("ReplaceSurname").get(0);
-        Assertions.assertEquals("ReplaceName",replacedUser.getName());
-        Assertions.assertEquals("ReplaceSurname",replacedUser.getSurname());
-        Assertions.assertEquals(18,replacedUser.getAge());
+        userService.replaceUser("SurnameStudent1", STUDENT, "ReplaceNameStudent", "ReplaceSurnameStudent", 22);
+        final var replacedStudent = userService.collectBySurname("ReplaceSurnameStudent");
+        Assertions.assertEquals(asList("ReplaceSurnameStudent", "ReplaceNameStudent", 22), replacedStudent);
 
-        userService.replaceUser("SurnameReviser", REVISER, "ReplaceReviserName", "ReplaceReviserSurname", 19);
-        final var replacedReviser = userService.collectBySurname("ReplaceReviserSurname").get(0);
-        Assertions.assertEquals("ReplaceReviserName",replacedReviser.getName());
-        Assertions.assertEquals("ReplaceReviserSurname",replacedReviser.getSurname());
-        Assertions.assertEquals(19,replacedReviser.getAge());
-
-        userService.replaceUser("SurnameTeacher1", TEACHER, "ReplaceTeacherName", "ReplaceTeacherSurname", 21);
-        final var replacedTeacher = userService.collectBySurname("ReplaceTeacherSurname").get(0);
-        Assertions.assertEquals("ReplaceTeacherName",replacedTeacher.getName());
-        Assertions.assertEquals("ReplaceTeacherSurname",replacedTeacher.getSurname());
-        Assertions.assertEquals(21,replacedTeacher.getAge());
-    }
+        userService.replaceUser("SurnameTeacher2", TEACHER, "ReplaceNameTeacher", "ReplaceSurnameTeacher", 42);
+        final var replacedTeacher = userService.collectBySurname("ReplaceSurnameTeacher");
+        Assertions.assertEquals(asList("ReplaceSurnameTeacher", "ReplaceNameTeacher", 42), replacedTeacher);
 
 
-    @Test
-    void removeUserTest() {
-        userService.createUserAndStore(REVISER, "NameReviser", "SurnameReviser", 30);
-        userService.createUserAndStore(STUDENT, "NameStudent1", "SurnameStudent1", 18);
-        userService.createUserAndStore(STUDENT, "NameStudent2", "SurnameStudent2", 21);
-        userService.createUserAndStore(TEACHER, "NameTeacher1", "SurnameTeacher1", 21);
-        userService.createUserAndStore(TEACHER, "NameTeacher2", "SurnameTeacher2", 29);
-
-        userService.removeUser("SurnameStudent1");
-
-        final var replacedUser = userService.collectBySurname("SurnameStudent1");
-        Assertions.assertTrue( replacedUser.isEmpty());
     }
 
     @Test
-    void removeAllUsersTest() {
+    void removeUserTest() throws SQLException {
+        userService.createUserAndStore(REVISER, "SurnameReviser", "NameReviser", 30);
+        userService.createUserAndStore(STUDENT, "SurnameStudent1", "NameStudent1", 18);
+        userService.createUserAndStore(STUDENT, "SurnameStudent2", "NameStudent2", 21);
+        userService.createUserAndStore(TEACHER, "SurnameTeacher1", "NameTeacher1", 21);
+        userService.createUserAndStore(TEACHER, "SurnameTeacher2", "NameTeacher2", 29);
+
+        final var allUsers = userService.collectAllUsers();
+        Assertions.assertEquals(asList("SurnameReviser", "NameReviser", 30, "SurnameTeacher1", "NameTeacher1", 21, "SurnameTeacher2", "NameTeacher2", 29, "SurnameStudent1", "NameStudent1", 18, "SurnameStudent2", "NameStudent2", 21),
+                allUsers);
+        userService.removeUser("SurnameReviser", "NameReviser");
+
+        final var replacedUser = userService.collectBySurname("SurnameReviser");
+        Assertions.assertTrue(replacedUser.isEmpty());
+    }
+
+    @Test
+    void removeAllUsersTest() throws SQLException {
         userService.createUserAndStore(REVISER, "NameReviser", "SurnameReviser", 30);
         userService.createUserAndStore(STUDENT, "NameStudent1", "SurnameStudent1", 18);
         userService.createUserAndStore(STUDENT, "NameStudent2", "SurnameStudent2", 21);

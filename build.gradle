@@ -9,13 +9,15 @@ java {
 }
 
 group 'net.education'
-version '1.0'
+version '2.0'
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
+  //  compile ("ch.vorburger.mariaDB4j:mariaDB4j:2.2.3")
+    implementation ("ch.vorburger.mariaDB4j:mariaDB4j:2.2.3")
     implementation("org.junit.jupiter:junit-jupiter-api:$junit")
     implementation("com.github.javafaker:javafaker:$faker")
     implementation("ch.qos.logback:logback-classic:${logback}")
@@ -27,6 +29,7 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junit")
     testRuntimeOnly("com.github.javafaker:javafaker:$faker")
     testRuntimeOnly("org.slf4j:slf4j-api:${slf4j}")
+    implementation("org.mariadb.jdbc:mariadb-java-client:${mariaDb}")
 }
 
 test {

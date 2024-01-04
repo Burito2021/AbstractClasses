@@ -1,0 +1,8 @@
+-- # create databases
+CREATE DATABASE IF NOT EXISTS EDUCATION;
+
+-- # create user and grant rights
+CREATE USER 'EDUCATION'@'%' IDENTIFIED BY 'education';
+GRANT ALL PRIVILEGES ON *.* TO 'EDUCATION'@'%';
+FLUSH PRIVILEGES;
+

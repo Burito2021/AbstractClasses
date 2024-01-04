@@ -1,49 +1,126 @@
 package net.education.kyivstar;
 
-import net.education.kyivstar.courseParticipants.Human;
-import net.education.kyivstar.courseParticipants.Teacher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
-public class TeacherRepository {
+public class TeacherRepository extends DbConnector {
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
-    private final Storage data;
+    private Connection conn = null;
 
-    public TeacherRepository(Storage storage) {
-        this.data = storage;
+    private void openConnection() {
+        conn = connectDb();
     }
 
-    public void addTeacher(Teacher teacher) {
-        data.insert(teacher);
+    public void addTeacher(String surname, String name, int age) throws SQLException {
+        openConnection();
+        PreparedStatement ps = null;
+
+        try {
+            ps = conn.prepareStatement("INSERT INTO TEACHERS (SURNAME,NAME,AGE,ENTRY_DATE) VALUES(?,?,?,?)");
+            ps.setString(1, surname);
+            ps.setString(2, name);
+            ps.setInt(3, age);
+            ps.setString(4, Utils.currentDateTime());
+            int insert = ps.executeUpdate();
+            logger.info("Insert " + insert + " " + String.valueOf(ps));
+            logger.info(String.valueOf(ps));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            ps.close();
+            conn.close();
+        }
+
     }
 
-    public List<Teacher> extractAllTeachers() {
-        return data.selectAll()
-                .stream()
-                .filter(obj -> obj instanceof Teacher)
-                .map(human -> (Teacher) human)
-                .collect(Collectors.toList());
+    public List<Object> extractTeacherBySurname(String surname) throws SQLException {
+
+        openConnection();
+        PreparedStatement ps = null;
+        List<Object> resultTasks = new ArrayList<>();
+        try {
+            ps = conn.prepareStatement("SELECT SURNAME,NAME,AGE FROM TEACHERS r WHERE SURNAME =?");
+            ps.setString(1, surname);
+            ps.executeUpdate();
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                resultTasks.add(rs.getString("SURNAME"));
+                resultTasks.add(rs.getString("NAME"));
+                resultTasks.add(rs.getInt("AGE"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            ps.close();
+            conn.close();
+        }
+        return resultTasks;
     }
 
-    public void updateTeacherBySurname(String surname, Teacher humanToReplaceWith) {
-        List<Human> humans = data.selectAllTeachers()
-                .stream()
-                .filter(human -> human.getSurname().equals(surname)).collect(Collectors.toList());
-        data.update(humans,humanToReplaceWith);
+    public List<Object> extractAllTeachers() throws SQLException {
+
+        openConnection();
+        PreparedStatement ps = null;
+        List<Object> resultTasks = new ArrayList<>();
+        try {
+            ps = conn.prepareStatement("" +
+                    "SELECT SURNAME,NAME,AGE FROM TEACHERS r");
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                resultTasks.add(rs.getString("SURNAME"));
+                resultTasks.add(rs.getString("NAME"));
+                resultTasks.add(rs.getInt("AGE"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            ps.close();
+            conn.close();
+        }
+        return resultTasks;
     }
 
-    public void removeTeacherBySurname(String surname) {
-        List<Human> list = data.selectAllTeachers()
-                .stream()
-                .filter(s -> s.getSurname()
-                        .equals(surname))
-                .collect(Collectors.toList());
-        data.deleteBySurname(list);
+    public void updateTeacherBySurname(String surname, String surnameToReplace, String nameToReplace, int ageToReplace) throws SQLException {
+        openConnection();
+        PreparedStatement ps = null;
+        try {
+            ps = conn.prepareStatement("UPDATE TEACHERS SET SURNAME = ?, NAME =?, AGE =? WHERE SURNAME =?");
+            ps.setString(1, surnameToReplace);
+            ps.setString(2, nameToReplace);
+            ps.setInt(3, ageToReplace);
+            ps.setString(4, surname);
+            ps.executeUpdate();
+            logger.info(String.valueOf(ps));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            ps.close();
+            conn.close();
+        }
+    }
+
+    public void removeTeacherBySurname(String surname) throws SQLException {
+        openConnection();
+        PreparedStatement ps = null;
+        try {
+            ps = conn.prepareStatement("DELETE FROM TEACHERS WHERE SURNAME =?");
+            ps.setString(1, surname);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            ps.close();
+            conn.close();
+        }
     }
 }
