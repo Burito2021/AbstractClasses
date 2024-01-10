@@ -1,42 +1,40 @@
 package net.education.kyivstar;
 
-import com.github.javafaker.Faker;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import net.education.kyivstar.config.CreateSchema;
+import org.junit.jupiter.api.*;
 
 import java.sql.SQLException;
-import java.util.Random;
 
 import static java.util.Arrays.asList;
 import static net.education.kyivstar.Names.*;
 import static net.education.kyivstar.UserType.*;
+import static net.education.kyivstar.config.EducationEmbeddedMariaDb.startEmbeddedMariaDB;
+import static net.education.kyivstar.config.EducationEmbeddedMariaDb.stopEmbeddedMariaDB;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
-
+@TestInstance(PER_CLASS)
 class UserServiceTest {
-    Faker faker = new Faker();
-    Random random = new Random();
-    DbConnector db = new DbConnector();
-
-    ReviserRepository reviserRepository = new ReviserRepository();
-    StudentRepository studentRepository = new StudentRepository();
-    TeacherRepository teacherRepository = new TeacherRepository();
+    CreateSchema createSchema = new CreateSchema();
     UserService userService = new UserService();
+
+    @BeforeAll
+    void clean() throws SQLException {
+        startEmbeddedMariaDB();
+        createSchema.createDataBase();
+        createSchema.createTables();
+    }
 
     @BeforeEach
     void cleanDb() throws SQLException {
         userService.removeAll();
     }
 
-    @Test
-    void test() throws SQLException {
-        final var students = studentRepository.extractAllStudents();
-        System.out.println(students);
-        studentRepository.addStudent("ddas", "asd", 21);
+    @AfterAll
+    void cleanAfter() {
+        stopEmbeddedMariaDB();
     }
-
 
     @Test
     void populateStorageTest() throws SQLException {
@@ -114,7 +112,7 @@ class UserServiceTest {
         final var teacher2 = userService.collectTeachersBySurname("SurnameTeacher2");
         assertNotNull(teacher1);
         assertNotNull(teacher2);
-        assertEquals(asList("SurnameTeacher", "NameTeacher", 30),teacher1);
+        assertEquals(asList("SurnameTeacher", "NameTeacher", 30), teacher1);
         assertEquals(asList("SurnameTeacher2", "NameTeacher2", 32), teacher2);
     }
 

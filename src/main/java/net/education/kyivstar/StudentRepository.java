@@ -18,7 +18,7 @@ public class StudentRepository extends DbConnector {
     }
 
     private void openConnection() {
-        conn = connectDb();
+        conn = connectMariaDb();
     }
 
     public void addStudent(String surname, String name, int age) throws SQLException {

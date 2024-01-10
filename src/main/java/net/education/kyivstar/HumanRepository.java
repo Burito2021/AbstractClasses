@@ -15,7 +15,7 @@ public class HumanRepository extends DbConnector {
 
 
     private void openConnection() {
-        conn = connectDb();
+        conn = connectMariaDb();
     }
 
     public void removeUserBySurname(String surname, String name) throws SQLException {

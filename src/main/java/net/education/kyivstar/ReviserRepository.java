@@ -16,7 +16,7 @@ public class ReviserRepository extends DbConnector {
     private Connection conn = null;
 
     private void openConnection() {
-        conn = connectDb();
+        conn = connectMariaDb();
     }
 
     public void addReviser(String surname, String name, int age) throws SQLException {

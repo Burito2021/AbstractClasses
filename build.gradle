@@ -16,8 +16,11 @@ repositories {
 }
 
 dependencies {
-  //  compile ("ch.vorburger.mariaDB4j:mariaDB4j:2.2.3")
-    implementation ("ch.vorburger.mariaDB4j:mariaDB4j:2.2.3")
+    
+    implementation("org.aeonbits.owner:owner:${aeonbits}")
+    implementation ("org.yaml:snakeyaml:${snakeyaml}")
+    implementation ("ch.vorburger.mariaDB4j:mariaDB4j:${mariaDB4j}")
+    implementation("org.jasypt:jasypt:${jasypt}")
     implementation("org.junit.jupiter:junit-jupiter-api:$junit")
     implementation("com.github.javafaker:javafaker:$faker")
     implementation("ch.qos.logback:logback-classic:${logback}")
@@ -30,6 +33,7 @@ dependencies {
     testRuntimeOnly("com.github.javafaker:javafaker:$faker")
     testRuntimeOnly("org.slf4j:slf4j-api:${slf4j}")
     implementation("org.mariadb.jdbc:mariadb-java-client:${mariaDb}")
+
 }
 
 test {
