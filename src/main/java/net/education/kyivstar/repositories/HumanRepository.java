@@ -1,5 +1,6 @@
-package net.education.kyivstar;
+package net.education.kyivstar.repositories;
 
+import net.education.kyivstar.services.db.DbConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +16,7 @@ public class HumanRepository extends DbConnector {
 
 
     private void openConnection() {
-        conn = connectDb();
+        conn = connectMariaDb(true);
     }
 
     public void removeUserBySurname(String surname, String name) throws SQLException {

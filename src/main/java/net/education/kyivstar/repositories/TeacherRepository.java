@@ -1,5 +1,8 @@
-package net.education.kyivstar;
+package net.education.kyivstar.repositories;
 
+import net.education.kyivstar.services.db.DbConnector;
+import net.education.kyivstar.services.user.UserService;
+import net.education.kyivstar.services.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,23 +13,21 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StudentRepository extends DbConnector {
+public class TeacherRepository extends DbConnector {
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+
     private Connection conn = null;
 
-    public StudentRepository() {
-    }
-
     private void openConnection() {
-        conn = connectDb();
+        conn = connectMariaDb(true);
     }
 
-    public void addStudent(String surname, String name, int age) throws SQLException {
+    public void addTeacher(String surname, String name, int age) throws SQLException {
         openConnection();
         PreparedStatement ps = null;
 
         try {
-            ps = conn.prepareStatement("INSERT INTO STUDENTS (SURNAME,NAME,AGE,ENTRY_DATE) VALUES(?,?,?,?)");
+            ps = conn.prepareStatement("INSERT INTO TEACHERS (SURNAME,NAME,AGE,ENTRY_DATE) VALUES(?,?,?,?)");
             ps.setString(1, surname);
             ps.setString(2, name);
             ps.setInt(3, age);
@@ -43,13 +44,13 @@ public class StudentRepository extends DbConnector {
 
     }
 
-    public List<Object> extractStudentsBySurname(String surname) throws SQLException {
+    public List<Object> extractTeacherBySurname(String surname) throws SQLException {
 
         openConnection();
         PreparedStatement ps = null;
         List<Object> resultTasks = new ArrayList<>();
         try {
-            ps = conn.prepareStatement("SELECT SURNAME,NAME,AGE FROM STUDENTS r WHERE SURNAME =?");
+            ps = conn.prepareStatement("SELECT SURNAME,NAME,AGE FROM TEACHERS r WHERE SURNAME =?");
             ps.setString(1, surname);
             ps.executeUpdate();
 
@@ -59,25 +60,23 @@ public class StudentRepository extends DbConnector {
                 resultTasks.add(rs.getString("NAME"));
                 resultTasks.add(rs.getInt("AGE"));
             }
-            System.out.println(ps);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
             ps.close();
             conn.close();
         }
-        System.out.println(resultTasks);
         return resultTasks;
     }
 
-    public List<Object> extractAllStudents() throws SQLException {
+    public List<Object> extractAllTeachers() throws SQLException {
 
         openConnection();
         PreparedStatement ps = null;
         List<Object> resultTasks = new ArrayList<>();
         try {
             ps = conn.prepareStatement("" +
-                    "SELECT SURNAME,NAME,AGE, GROUP_ID FROM STUDENTS r");
+                    "SELECT SURNAME,NAME,AGE FROM TEACHERS r");
 
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -94,11 +93,11 @@ public class StudentRepository extends DbConnector {
         return resultTasks;
     }
 
-    public void updateStudentBySurname(String surname, String surnameToReplace, String nameToReplace, int ageToReplace) throws SQLException {
+    public void updateTeacherBySurname(String surname, String surnameToReplace, String nameToReplace, int ageToReplace) throws SQLException {
         openConnection();
         PreparedStatement ps = null;
         try {
-            ps = conn.prepareStatement("UPDATE STUDENTS SET SURNAME = ?, NAME =?, AGE =? WHERE SURNAME =?");
+            ps = conn.prepareStatement("UPDATE TEACHERS SET SURNAME = ?, NAME =?, AGE =? WHERE SURNAME =?");
             ps.setString(1, surnameToReplace);
             ps.setString(2, nameToReplace);
             ps.setInt(3, ageToReplace);
@@ -113,11 +112,11 @@ public class StudentRepository extends DbConnector {
         }
     }
 
-    public void removeStudentBySurname(String surname) throws SQLException {
+    public void removeTeacherBySurname(String surname) throws SQLException {
         openConnection();
         PreparedStatement ps = null;
         try {
-            ps = conn.prepareStatement("DELETE FROM STUDENTS WHERE SURNAME =?");
+            ps = conn.prepareStatement("DELETE FROM TEACHERS WHERE SURNAME =?");
             ps.setString(1, surname);
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -128,4 +127,3 @@ public class StudentRepository extends DbConnector {
         }
     }
 }
-

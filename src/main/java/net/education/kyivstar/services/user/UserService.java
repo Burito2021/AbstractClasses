@@ -1,6 +1,10 @@
-package net.education.kyivstar;
+package net.education.kyivstar.services.user;
 
 import com.github.javafaker.Faker;
+import net.education.kyivstar.repositories.HumanRepository;
+import net.education.kyivstar.repositories.ReviserRepository;
+import net.education.kyivstar.repositories.StudentRepository;
+import net.education.kyivstar.repositories.TeacherRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,7 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
-import static net.education.kyivstar.UserType.values;
+import static net.education.kyivstar.services.user.UserType.values;
 
 public class UserService {
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
