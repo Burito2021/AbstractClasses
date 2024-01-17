@@ -11,7 +11,6 @@ public class EducationEmbeddedMariaDb {
     public static void startEmbeddedMariaDB() {
         try {
             DBConfigurationBuilder config = DBConfigurationBuilder.newBuilder();
-            System.out.println(conf.getPort());
             config.setPort(conf.getPort());
             config.setDataDir(conf.getDirectory());
             db = DB.newEmbeddedDB(config.build());

@@ -1,5 +1,8 @@
-package net.education.kyivstar;
+package net.education.kyivstar.repositories;
 
+import net.education.kyivstar.services.db.DbConnector;
+import net.education.kyivstar.services.user.UserService;
+import net.education.kyivstar.services.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +19,7 @@ public class TeacherRepository extends DbConnector {
     private Connection conn = null;
 
     private void openConnection() {
-        conn = connectMariaDb();
+        conn = connectMariaDb(true);
     }
 
     public void addTeacher(String surname, String name, int age) throws SQLException {

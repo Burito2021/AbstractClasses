@@ -1,13 +1,12 @@
 package net.education.kyivstar;
 
 import net.education.kyivstar.config.CreateSchema;
+import net.education.kyivstar.services.user.UserService;
 import org.junit.jupiter.api.*;
-
 import java.sql.SQLException;
-
 import static java.util.Arrays.asList;
 import static net.education.kyivstar.Names.*;
-import static net.education.kyivstar.UserType.*;
+import static net.education.kyivstar.services.user.UserType.*;
 import static net.education.kyivstar.config.EducationEmbeddedMariaDb.startEmbeddedMariaDB;
 import static net.education.kyivstar.config.EducationEmbeddedMariaDb.stopEmbeddedMariaDB;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -20,7 +19,7 @@ class UserServiceTest {
     UserService userService = new UserService();
 
     @BeforeAll
-    void clean() throws SQLException {
+    void clean() {
         startEmbeddedMariaDB();
         createSchema.createDataBase();
         createSchema.createTables();

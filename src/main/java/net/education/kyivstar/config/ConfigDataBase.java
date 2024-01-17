@@ -1,9 +1,6 @@
 package net.education.kyivstar.config;
 
-import org.yaml.snakeyaml.Yaml;
-
-import java.io.InputStream;
-import java.util.Map;
+import static net.education.kyivstar.services.util.Utils.loadConfig;
 
 public class ConfigDataBase {
     private String url;
@@ -12,8 +9,33 @@ public class ConfigDataBase {
     private String directory;
     private String user;
     private String password;
+
     public ConfigDataBase() {
-        loadConfig();
+        loadConfig(this);
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    public void setDbName(String dbName) {
+        this.dbName = dbName;
+    }
+
+    public void setDirectory(String directory) {
+        this.directory = directory;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getUser() {
@@ -38,25 +60,5 @@ public class ConfigDataBase {
 
     public String getDbName() {
         return dbName;
-    }
-
-    private void loadConfig() {
-
-        try {
-            InputStream inputStream = getClass().getClassLoader().getResourceAsStream("application.yml");
-            Yaml yaml = new Yaml();
-            Map<String, Map<String, Object>> yamlData = yaml.load(inputStream);
-
-            Map<String, Object> dbConfig = yamlData.get("database");
-
-            url = (String) dbConfig.get("url");
-            port = (int) dbConfig.get("port");
-            dbName = (String) dbConfig.get("dbName");
-            directory = (String) dbConfig.get("directory");
-            password = (String) dbConfig.get("password");
-            user = (String) dbConfig.get("user");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }

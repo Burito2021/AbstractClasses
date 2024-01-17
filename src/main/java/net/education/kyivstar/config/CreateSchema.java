@@ -1,39 +1,19 @@
 package net.education.kyivstar.config;
 
-import net.education.kyivstar.DbConnector;
+import net.education.kyivstar.services.db.DbConnector;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.sql.Statement;
 
-import static net.education.kyivstar.config.ScriptFileReader.readSqlScriptFromFile;
+import static net.education.kyivstar.services.util.Utils.readSqlScriptFromFile;
 
 public class CreateSchema extends DbConnector {
 
-    DbConnector dbConnector = new DbConnector();
-    Connection connDb = null;
-    Connection connection = null;
-    ConfigDataBase config = new ConfigDataBase();
+    public void createDataBase() {
 
-    public Connection connectMariaDbWithoutDbName() {
-        Connection conn = null;
-        try {
-            String url = config.getUrl() + ":" + config.getPort();
+        try (Connection connection = connectMariaDb(false);
+             Statement statement = connection.createStatement()) {
 
-            conn = DriverManager.getConnection(url);
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return conn;
-    }
-
-    public void createDataBase() throws SQLException {
-        connection = connectMariaDbWithoutDbName();
-        Statement statement = null;
-        try {
-            statement = connection.createStatement();
             String sqlScript = readSqlScriptFromFile("src/main/resources/mariaDb/init.sql");
 
             String[] statements = sqlScript.split(";");
@@ -47,18 +27,13 @@ public class CreateSchema extends DbConnector {
 
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            statement.close();
-            connection.close();
         }
-
     }
 
-    public void createTables() throws SQLException {
-        Statement statement = null;
-        connDb = dbConnector.connectMariaDb();
-        try {
-            statement = connDb.createStatement();
+    public void createTables() {
+
+        try (Connection connDb = connectMariaDb(true);
+             Statement statement = connDb.createStatement()) {
 
             connDb.setAutoCommit(false);
 
@@ -76,10 +51,6 @@ public class CreateSchema extends DbConnector {
             connDb.commit();
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            connDb.setAutoCommit(true);
-            statement.close();
-            connDb.close();
         }
     }
 }
