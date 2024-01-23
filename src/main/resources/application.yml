@@ -1,0 +1,7 @@
+database:
+  url: jdbc:mariadb://localhost
+  port: 3323
+  username: 'user'
+  password: ENC(4ZOhlGf6p2R+DLlghvYBgHPZk6Dbu5os)
+  dbName: 'EDUCATION'
+  directory: "D:\\Education\\MariaBBB\\d"
