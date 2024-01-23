@@ -17,15 +17,22 @@ import static net.education.kyivstar.services.user.UserType.values;
 
 public class UserService {
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
-    final Faker faker = new Faker();
-    final Random random = new Random();
+    final Faker faker;
+    final Random random;
 
-    private HumanRepository humanRepository = new HumanRepository();
-    private ReviserRepository reviserRepository = new ReviserRepository();
-    private StudentRepository studentRepository = new StudentRepository();
-    private TeacherRepository teacherRepository = new TeacherRepository();
+    private final HumanRepository humanRepository;
+    private final ReviserRepository reviserRepository;
+    private final StudentRepository studentRepository;
+    private final TeacherRepository teacherRepository;
 
-    public UserService() {
+
+    public UserService(Faker faker, Random random, HumanRepository humanRepository, ReviserRepository reviserRepository, StudentRepository studentRepository, TeacherRepository teacherRepository) {
+        this.faker = faker;
+        this.random = random;
+        this.humanRepository = humanRepository;
+        this.reviserRepository = reviserRepository;
+        this.studentRepository = studentRepository;
+        this.teacherRepository = teacherRepository;
     }
 
 

@@ -13,15 +13,18 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StudentRepository extends DbConnector {
+public class StudentRepository {
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
     private Connection conn = null;
 
-    public StudentRepository() {
+    private DbConnector dbConnector;
+
+    public StudentRepository(DbConnector dbConnector) {
+        this.dbConnector = dbConnector;
     }
 
     private void openConnection() {
-        conn = connectMariaDb(true);
+        conn = dbConnector.connectMariaDb(true);
     }
 
     public void addStudent(String surname, String name, int age) throws SQLException {

@@ -4,7 +4,12 @@ import ch.vorburger.mariadb4j.DB;
 import ch.vorburger.mariadb4j.DBConfigurationBuilder;
 
 public class EducationEmbeddedMariaDb {
-    private static ConfigDataBase conf = new ConfigDataBase();
+
+    private static ConfigDataBase conf;
+
+    public EducationEmbeddedMariaDb(ConfigDataBase conf) {
+        this.conf = conf;
+    }
 
     private static DB db = null;
 

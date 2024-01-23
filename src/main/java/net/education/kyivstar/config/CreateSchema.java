@@ -7,11 +7,16 @@ import java.sql.Statement;
 
 import static net.education.kyivstar.services.util.Utils.readSqlScriptFromFile;
 
-public class CreateSchema extends DbConnector {
+public class CreateSchema {
+    private DbConnector dbConnector;
+
+    public CreateSchema(DbConnector dbConnector) {
+        this.dbConnector = dbConnector;
+    }
 
     public void createDataBase() {
 
-        try (Connection connection = connectMariaDb(false);
+        try (Connection connection = dbConnector.connectMariaDb(false);
              Statement statement = connection.createStatement()) {
 
             String sqlScript = readSqlScriptFromFile("src/main/resources/mariaDb/init.sql");
@@ -32,7 +37,7 @@ public class CreateSchema extends DbConnector {
 
     public void createTables() {
 
-        try (Connection connDb = connectMariaDb(true);
+        try (Connection connDb = dbConnector.connectMariaDb(true);
              Statement statement = connDb.createStatement()) {
 
             connDb.setAutoCommit(false);

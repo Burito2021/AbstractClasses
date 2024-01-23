@@ -13,13 +13,18 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ReviserRepository extends DbConnector {
+public class ReviserRepository {
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     private Connection conn = null;
+    private DbConnector dbConnector;
+
+    public ReviserRepository(DbConnector dbConnector) {
+        this.dbConnector = dbConnector;
+    }
 
     private void openConnection() {
-        conn = connectMariaDb(true);
+        conn = dbConnector.connectMariaDb(true);
     }
 
     public void addReviser(String surname, String name, int age) throws SQLException {

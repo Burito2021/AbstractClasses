@@ -10,13 +10,17 @@ import java.util.HashMap;
 import java.util.List;
 
 
-public class HumanRepository extends DbConnector {
+public class HumanRepository {
     private static final Logger logger = LoggerFactory.getLogger(HumanRepository.class);
     private Connection conn = null;
+    private DbConnector dbConnector;
 
+    public HumanRepository(DbConnector dbConnector) {
+        this.dbConnector = dbConnector;
+    }
 
     private void openConnection() {
-        conn = connectMariaDb(true);
+        conn = dbConnector.connectMariaDb(true);
     }
 
     public void removeUserBySurname(String surname, String name) throws SQLException {
