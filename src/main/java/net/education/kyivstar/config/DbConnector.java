@@ -1,4 +1,4 @@
-package net.education.kyivstar.services.db;
+package net.education.kyivstar.config;
 
 import net.education.kyivstar.config.ConfigDataBase;
 

@@ -1,6 +1,6 @@
 package net.education.kyivstar.repositories;
 
-import net.education.kyivstar.services.db.DbConnector;
+import net.education.kyivstar.config.DbConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

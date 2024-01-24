@@ -3,11 +3,11 @@ package net.education.kyivstar.config;
 import ch.vorburger.mariadb4j.DB;
 import ch.vorburger.mariadb4j.DBConfigurationBuilder;
 
-public class EducationEmbeddedMariaDb {
+public class MariaDbDeployment {
 
     private static ConfigDataBase conf;
 
-    public EducationEmbeddedMariaDb(ConfigDataBase conf) {
+    public MariaDbDeployment(ConfigDataBase conf) {
         this.conf = conf;
     }
 

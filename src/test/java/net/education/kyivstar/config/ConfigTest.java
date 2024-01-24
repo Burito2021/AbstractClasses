@@ -6,7 +6,6 @@ import net.education.kyivstar.repositories.HumanRepository;
 import net.education.kyivstar.repositories.ReviserRepository;
 import net.education.kyivstar.repositories.StudentRepository;
 import net.education.kyivstar.repositories.TeacherRepository;
-import net.education.kyivstar.services.db.DbConnector;
 import net.education.kyivstar.services.user.UserService;
 import net.education.kyivstar.services.util.Utils;
 import org.junit.jupiter.api.Test;
@@ -16,8 +15,9 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Random;
 
-import static net.education.kyivstar.config.EducationEmbeddedMariaDb.startEmbeddedMariaDB;
-import static net.education.kyivstar.config.EducationEmbeddedMariaDb.stopEmbeddedMariaDB;
+import static net.education.kyivstar.config.MariaDbDeployment.startEmbeddedMariaDB;
+import static net.education.kyivstar.config.MariaDbDeployment.stopEmbeddedMariaDB;
+import static net.education.kyivstar.services.util.Utils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -32,7 +32,7 @@ class ConfigTest extends BaseTest {
     TeacherRepository teacherRepository = new TeacherRepository(dbConnector);
     UserService userService = new UserService(faker, random, humanRepository, reviserRepository, studentRepository, teacherRepository);
 
-    EducationEmbeddedMariaDb educationEmbeddedMariaDb = new EducationEmbeddedMariaDb(configDataBase);
+    MariaDbDeployment educationEmbeddedMariaDb = new MariaDbDeployment(configDataBase);
 
 
     @Test
@@ -86,7 +86,7 @@ class ConfigTest extends BaseTest {
 
     @Test
     void scriptFileReader() {
-        final var result = Utils.readSqlScriptFromFile("src/test/java/resources/script_reader_test.sql");
+        final var result = readSqlScriptFromFile("src/test/java/resources/script_reader_test.sql");
 
         final var expected = "create table REVISERS\n" +
                 "(\n" +

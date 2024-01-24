@@ -1,7 +1,5 @@
 package net.education.kyivstar.config;
 
-import net.education.kyivstar.services.db.DbConnector;
-
 import java.sql.Connection;
 import java.sql.Statement;
 
