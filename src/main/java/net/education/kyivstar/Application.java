@@ -36,7 +36,6 @@ public class Application {
         UserService userService = new UserService(faker, random, humanRepository, reviserRepository, studentRepository, teacherRepository);
 
         startEmbeddedMariaDB();
-
         createSchema.createDataBase();
         createSchema.createTables();
         userService.populateStorage(10);
