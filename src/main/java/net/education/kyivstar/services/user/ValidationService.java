@@ -1,4 +1,4 @@
-package net.education.kyivstar;
+package net.education.kyivstar.services.user;
 
 public class ValidationService {
 
@@ -22,7 +22,6 @@ public class ValidationService {
     }
 
     public static void validateName(String name) {
-
         if (name == null || name.trim().isEmpty()) {
             throw new IllegalArgumentException("WRONG NAME/SURNAME");
         }
@@ -32,7 +31,6 @@ public class ValidationService {
     }
 
     public static void validateAge(int age) {
-
         if (age >= 100 || age < 15) {
             throw new IllegalArgumentException("WRONG AGE");
         }
