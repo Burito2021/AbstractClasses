@@ -7,7 +7,7 @@
     </appender>
     <logger name="io.qameta.allure.AllureLifecycle" level="OFF"/>
     <logger name="net.kyivstar.secmon.services.db.DbExecutor" level="INFO"/>
-    <root level="INFO">
+    <root level="DEBUG">
         <appender-ref ref="STDOUT"/>
     </root>
 </configuration>

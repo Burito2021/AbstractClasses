@@ -1,41 +1,49 @@
 package net.education.kyivstar;
 
 import com.github.javafaker.Faker;
+import net.education.kyivstar.config.ConfigDataBase;
+import net.education.kyivstar.config.EmbeddedMariaDbLifeCycle;
+import net.education.kyivstar.config.HikariConnectionManager;
+import net.education.kyivstar.config.SchemaAndTableCreator;
+import net.education.kyivstar.repositories.HumanRepository;
+import net.education.kyivstar.repositories.ReviserRepository;
+import net.education.kyivstar.repositories.StudentRepository;
+import net.education.kyivstar.repositories.TeacherRepository;
+import net.education.kyivstar.services.user.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Random;
 
-import static net.education.kyivstar.UserType.REVISER;
-import static net.education.kyivstar.UserType.STUDENT;
-
 public class Application {
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
 
     public static void main(String[] args) {
-        Storage storage = new Storage();
-        ReviserRepository reviserRepository = new ReviserRepository(storage);
-        StudentRepository studentRepository = new StudentRepository(storage);
-        TeacherRepository teacherRepository = new TeacherRepository(storage);
-        HumanRepository humanRepository = new HumanRepository(storage);
-        UserService userService = new UserService(new Faker(), new Random(), humanRepository, reviserRepository, studentRepository, teacherRepository);
+        var faker = new Faker();
+        var random = new Random();
+        var configDataBase = new ConfigDataBase();
+        var embeddedMariaDbLifeCycle = new EmbeddedMariaDbLifeCycle(configDataBase);
+        var createSchema = new SchemaAndTableCreator(embeddedMariaDbLifeCycle);
+        createSchema.createDataBase();
+        var hikariConnectManager = HikariConnectionManager.getInstance(configDataBase);
+        var humanRepository = new HumanRepository(hikariConnectManager);
+        var reviserRepository = new ReviserRepository(hikariConnectManager);
+        var studentRepository = new StudentRepository(hikariConnectManager);
+        var teacherRepository = new TeacherRepository(hikariConnectManager);
+        var userService = new UserService(faker, random, humanRepository, reviserRepository, studentRepository, teacherRepository);
 
-        userService.populateStorage(1);
-        userService.createUserAndStore(REVISER, "d1", "lds", 16);
-        userService.createUserAndStore(REVISER, "d1", "lds6", 16);
-        userService.createUserAndStore(STUDENT, "d1", "lds6", 16);
-userService.printStorageAllUsers();
-        userService.replaceUser("lds6",REVISER,"replacemnt","ssss",86);
-        System.out.println("!!!! after replacement");
-userService.printStorageAllUsers();
-      /*  userService.createUserAndStore(STUDENT, "d2", "lds2", 16);
-        userService.createUserAndStore(TEACHER, "d2", "lds3", 16);
-        userService.createUserAndStore(REVISER, "d3", "lulu", 18);
-        System.out.println("ALL");
-        userService.printStorageAllUsers();
-        userService.replaceUser("lds6",REVISER,"d4","replaced",20);
-        System.out.println("!!!");
-        userService.printStorageAllUsers();*/
+        try {
+            createSchema.createTables();
+            userService.populateStorage(10);
+            userService.countAllUsers();
+            userService.printStorageAllUsers();
 
+        } catch (Exception e) {
+            logger.debug("Application error " + e);
+            throw new RuntimeException("Error " + e);
+        } finally {
+            hikariConnectManager.closeConnection();
+            embeddedMariaDbLifeCycle.stopEmbeddedMariaDB();
+        }
     }
 }
