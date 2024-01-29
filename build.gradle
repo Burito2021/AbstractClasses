@@ -1,6 +1,10 @@
-
 plugins {
     id 'java'
+    id 'application'
+}
+
+application {
+    mainClassName = 'net.education.kyivstar.Application'
 }
 
 java {
@@ -16,27 +20,45 @@ repositories {
 }
 
 dependencies {
-    
+
     implementation("org.aeonbits.owner:owner:${aeonbits}")
-    implementation ("org.yaml:snakeyaml:${snakeyaml}")
-    implementation ("ch.vorburger.mariaDB4j:mariaDB4j:${mariaDB4j}")
+    implementation("org.yaml:snakeyaml:${snakeyaml}")
+    implementation("ch.vorburger.mariaDB4j:mariaDB4j:${mariaDB4j}")
     implementation("org.jasypt:jasypt:${jasypt}")
     implementation("org.junit.jupiter:junit-jupiter-api:$junit")
     implementation("com.github.javafaker:javafaker:$faker")
     implementation("ch.qos.logback:logback-classic:${logback}")
-    implementation("ch.qos.logback:logback-core:${logback}")
-    testImplementation ("org.hamcrest:hamcrest-core:$hamcrestcore")
-    testImplementation ("org.hamcrest:hamcrest:$hamcrest")
-    testImplementation ("org.hamcrest:hamcrest-junit:$hamcrestjunit")
-    testImplementation ("org.assertj:assertj-core:$assertj")
+    testRuntimeOnly("ch.qos.logback:logback-core:${logback}")
+    testRuntimeOnly("org.slf4j:slf4j-api:${slf4j}")
+    testImplementation("org.hamcrest:hamcrest-core:$hamcrestcore")
+    testImplementation("org.hamcrest:hamcrest:$hamcrest")
+    testImplementation("org.hamcrest:hamcrest-junit:$hamcrestjunit")
+    testImplementation("org.assertj:assertj-core:$assertj")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junit")
     testRuntimeOnly("com.github.javafaker:javafaker:$faker")
-    testRuntimeOnly("org.slf4j:slf4j-api:${slf4j}")
     implementation("org.mariadb.jdbc:mariadb-java-client:${mariaDb}")
-
 }
 
 test {
     useJUnitPlatform()
+}
+
+
+jar {
+    duplicatesStrategy = 'exclude'
+
+    from sourceSets.main.output
+    from(sourceSets.main.resources) {
+        eachFile { file ->
+            file.path = "resources/${file.path}"
+        }
+    }
+
+    from configurations.runtimeClasspath.collect { zipTree(it) }
+
+
+    manifest {
+        attributes 'Main-Class': application.mainClassName
+    }
 }
 

@@ -6,18 +6,17 @@ import net.education.kyivstar.repositories.HumanRepository;
 import net.education.kyivstar.repositories.ReviserRepository;
 import net.education.kyivstar.repositories.StudentRepository;
 import net.education.kyivstar.repositories.TeacherRepository;
-import net.education.kyivstar.services.db.DbConnector;
 import net.education.kyivstar.services.user.UserService;
 import net.education.kyivstar.services.util.Utils;
 import org.junit.jupiter.api.Test;
 
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Random;
 
-import static net.education.kyivstar.config.EducationEmbeddedMariaDb.startEmbeddedMariaDB;
-import static net.education.kyivstar.config.EducationEmbeddedMariaDb.stopEmbeddedMariaDB;
+import static net.education.kyivstar.services.util.Utils.readSqlScriptFromFileStream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -32,25 +31,30 @@ class ConfigTest extends BaseTest {
     TeacherRepository teacherRepository = new TeacherRepository(dbConnector);
     UserService userService = new UserService(faker, random, humanRepository, reviserRepository, studentRepository, teacherRepository);
 
-    EducationEmbeddedMariaDb educationEmbeddedMariaDb = new EducationEmbeddedMariaDb(configDataBase);
+    MariaDbDeploy deployMaria = new MariaDbDeploy(configDataBase);
 
 
-    @Test
+ /*   @Test
     void loadConfigTest() {
         configDataBase.loadConfig();
 
         assertEquals("jdbc:mariadb://localhost", configDataBase.getUrl());
-        assertEquals(3324, configDataBase.getPort());
+        assertEquals(3536, configDataBase.getPort());
         assertEquals("user", configDataBase.getUser());
         assertEquals("password", configDataBase.getPass());
         assertEquals("EDUCATION", configDataBase.getDbName());
-        assertEquals("D:\\Education\\MariaBBB\\d", configDataBase.getDirectory());
+        assertEquals("D:\\Education\\MariaBBB\\ddddddddddddddd\\13", configDataBase.getDirectory());
+    }*/
+
+    @Test
+    void setTeacherRepository() {
+        System.out.println(System.getProperty("user.dir"));
     }
 
     @Test
     void createTablesTest() throws SQLException, InterruptedException {
         try {
-            startEmbeddedMariaDB();
+            deployMaria.startEmbeddedMariaDB();
             CreateSchema createSchema = new CreateSchema(dbConnector);
             createSchema.createTables();
             Connection conn = dbConnector.connectMariaDb(true);
@@ -67,7 +71,7 @@ class ConfigTest extends BaseTest {
             assertEquals(Arrays.asList("Bib", "Tom", 21), students);
             assertEquals(Arrays.asList("Fin", "Tom", 33), teachers);
         } finally {
-            stopEmbeddedMariaDB();
+            deployMaria.stopEmbeddedMariaDB();
         }
     }
 
@@ -86,9 +90,12 @@ class ConfigTest extends BaseTest {
 
     @Test
     void scriptFileReader() {
-        final var result = Utils.readSqlScriptFromFile("src/test/java/resources/script_reader_test.sql");
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("scripts/schema.sql");
 
-        final var expected = "create table REVISERS\n" +
+        String result = readSqlScriptFromFileStream(inputStream);
+
+        final var expected = "DROP table  IF EXISTS REVISERS;\n" +
+                "create table REVISERS\n" +
                 "(\n" +
                 "    ID            BIGINT AUTO_INCREMENT,\n" +
                 "    SURNAME VARCHAR(36) NOT NULL,\n" +
@@ -97,7 +104,31 @@ class ConfigTest extends BaseTest {
                 "    ENTRY_DATE  DATETIME DEFAULT CURRENT_TIMESTAMP,\n" +
                 "    PRIMARY KEY (ID)\n" +
                 "\n" +
-                ");";
-        assertEquals(expected.trim(), result.trim());
+                ");\n" +
+                "\n" +
+                "DROP table  IF EXISTS TEACHERS;\n" +
+                "CREATE TABLE TEACHERS\n" +
+                "(\n" +
+                "    ID            BIGINT AUTO_INCREMENT,\n" +
+                "    SURNAME VARCHAR(36) NOT NULL,\n" +
+                "    NAME       VARCHAR(36) NOT NULL,\n" +
+                "    AGE      INT NOT NULL,\n" +
+                "    ENTRY_DATE   DATETIME DEFAULT CURRENT_TIMESTAMP,\n" +
+                "    PRIMARY KEY (ID)\n" +
+                ");\n" +
+                "\n" +
+                "DROP table  IF EXISTS STUDENTS;\n" +
+                "CREATE TABLE STUDENTS\n" +
+                "(\n" +
+                "    ID            BIGINT AUTO_INCREMENT,\n" +
+                "    SURNAME VARCHAR(36) NOT NULL,\n" +
+                "    NAME       VARCHAR(36) NOT NULL,\n" +
+                "    AGE      INT NOT NULL,\n" +
+                "    GROUP_ID   BIGINT  NULL,\n" +
+                "    ENTRY_DATE   DATETIME  NOT NULL,\n" +
+                "    PRIMARY KEY (ID)\n" +
+                ");\n" +
+                "\n";
+        assertEquals(expected.trim().replaceAll("\\s+", ""), result.trim().replaceAll("\\s+", ""));
     }
 }

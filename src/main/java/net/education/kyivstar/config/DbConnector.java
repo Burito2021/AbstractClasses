@@ -1,6 +1,4 @@
-package net.education.kyivstar.services.db;
-
-import net.education.kyivstar.config.ConfigDataBase;
+package net.education.kyivstar.config;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

@@ -1,11 +1,15 @@
 package net.education.kyivstar.config;
 
-import net.education.kyivstar.services.db.DbConnector;
+import net.education.kyivstar.services.util.Utils;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.Statement;
 
-import static net.education.kyivstar.services.util.Utils.readSqlScriptFromFile;
+import static net.education.kyivstar.services.util.Utils.*;
+
 
 public class CreateSchema {
     private DbConnector dbConnector;
@@ -16,20 +20,24 @@ public class CreateSchema {
 
     public void createDataBase() {
 
-        try (Connection connection = dbConnector.connectMariaDb(false);
-             Statement statement = connection.createStatement()) {
+        try (Connection connDb = dbConnector.connectMariaDb(true);
+             Statement statement = connDb.createStatement()) {
 
-            String sqlScript = readSqlScriptFromFile("src/main/resources/mariaDb/init.sql");
+            connDb.setAutoCommit(false);
+
+            InputStream inputStream = getClass().getClassLoader().getResourceAsStream("scripts/init.sql");
+            String sqlScript = readSqlScriptFromFileStream(inputStream);
 
             String[] statements = sqlScript.split(";");
             for (String singleStatement : statements) {
                 if (!singleStatement.trim().isEmpty()) {
                     statement.addBatch(singleStatement);
                 }
-            }
 
+            }
             statement.executeBatch();
 
+            connDb.commit();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -42,15 +50,16 @@ public class CreateSchema {
 
             connDb.setAutoCommit(false);
 
-            String sqlScript = readSqlScriptFromFile("src/main/resources/mariaDb/schema.sql");
+            InputStream inputStream = getClass().getClassLoader().getResourceAsStream("scripts/schema.sql");
+            String sqlScript = readSqlScriptFromFileStream(inputStream);
 
             String[] statements = sqlScript.split(";");
             for (String singleStatement : statements) {
                 if (!singleStatement.trim().isEmpty()) {
                     statement.addBatch(singleStatement);
                 }
-            }
 
+            }
             statement.executeBatch();
 
             connDb.commit();
