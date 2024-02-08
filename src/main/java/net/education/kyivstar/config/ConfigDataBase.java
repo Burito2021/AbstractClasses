@@ -5,7 +5,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
+import java.io.InputStream;
 import java.util.Map;
+
+import static net.education.kyivstar.services.util.ConfigSchemaPassUtils.*;
 
 public class ConfigDataBase {
     private String url;
@@ -47,27 +50,54 @@ public class ConfigDataBase {
 
     public void loadConfig() {
 
-        try (var inputStream = Utils.class.getClassLoader().getResourceAsStream("config/application.yml")) {
-            Yaml yaml = new Yaml();
-            Map<String, Map<String, Object>> yamlData = yaml.load(inputStream);
+        try (var inputStream = Utils.class.getClassLoader().getResourceAsStream(CONFIG_PATH)) {
 
-            Map<String, Object> dbConfig = yamlData.get("database");
+            var yaml = new Yaml();
+            Map<String, Map<String, Object>> yamlData = streamNullValidator(yaml,inputStream);
 
-            url = (String) dbConfig.get("url");
-            port = (int) dbConfig.get("port");
-            dbName = (String) dbConfig.get("dbName");
-            directory = (String) dbConfig.get("directory");
-            user = (String) dbConfig.get("username");
+            Map<String, Object> dbConfig = yamlData.get(DATABASE);
 
-            if (dbConfig.get("password") != null && ((String) dbConfig.get("password")).startsWith("ENC(") && ((String) dbConfig.get("password")).endsWith(")")) {
-                var encryptedPassword = (String) dbConfig.get("password");
+            url = stringNullValidator(dbConfig, URL);
+            port = intNullValidator(dbConfig, PORT);
+            dbName = stringNullValidator(dbConfig, DB_NAME);
+            directory = stringNullValidator(dbConfig, DIRECTORY);
+            user = stringNullValidator(dbConfig, USER_NAME);
+
+            if (dbConfig.get(PASSWORD) != null && ((String) dbConfig.get(PASSWORD)).startsWith(ENC) && ((String) dbConfig.get(PASSWORD)).endsWith(BACK_BRACKET)) {
+                var encryptedPassword = (String) dbConfig.get(PASSWORD);
                 var decryptedPassword = PasswordEncryptor.decrypt(encryptedPassword.substring(4, encryptedPassword.length() - 1));
                 password = decryptedPassword;
             } else {
-                password = (String) dbConfig.get("password");
+                password = (String) dbConfig.get(PASSWORD);
             }
         } catch (Exception e) {
-            logger.info("error " + e);
+            throw new RuntimeException("Config build failed due to "+e);
         }
+    }
+
+    private int intNullValidator(Map<String, Object> dbConfig, String key) {
+        var value = dbConfig.get(key);
+        if (value == null) {
+            throw new RuntimeException(key + "is null");
+        }
+        return (int) value;
+    }
+
+    private String stringNullValidator(Map<String, Object> dbConfig, String key) {
+        var value = dbConfig.get(key);
+
+        if (value == null) {
+            throw new RuntimeException(key + "is null");
+        }
+        return (String) value;
+    }
+
+    private Map<String, Map<String, Object>> streamNullValidator(Yaml yaml, InputStream inputStream) {
+        Map<String, Map<String, Object>> yamlData = yaml.load(inputStream);
+
+        if (yamlData == null) {
+            throw new RuntimeException( "Config is null");
+        }
+        return yamlData;
     }
 }

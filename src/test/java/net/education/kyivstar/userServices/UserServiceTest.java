@@ -4,13 +4,14 @@ import com.github.javafaker.Faker;
 import net.education.kyivstar.BaseTest;
 import net.education.kyivstar.config.ConfigDataBase;
 import net.education.kyivstar.config.CreateSchema;
-import net.education.kyivstar.config.DbConnector;
+import net.education.kyivstar.config.HikariConfiguration;
 import net.education.kyivstar.config.MariaDbDeploy;
 import net.education.kyivstar.repositories.HumanRepository;
 import net.education.kyivstar.repositories.ReviserRepository;
 import net.education.kyivstar.repositories.StudentRepository;
 import net.education.kyivstar.repositories.TeacherRepository;
 import net.education.kyivstar.services.user.UserService;
+import net.education.kyivstar.services.util.Utils;
 import org.junit.jupiter.api.*;
 
 import java.sql.SQLException;
@@ -18,6 +19,7 @@ import java.util.Random;
 
 import static java.util.Arrays.asList;
 import static net.education.kyivstar.services.user.UserType.*;
+import static net.education.kyivstar.services.util.Utils.createDirectoryIfNotExists;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
@@ -25,25 +27,26 @@ import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 @TestInstance(PER_CLASS)
 class UserServiceTest extends BaseTest {
 
-
     Faker faker = new Faker();
     Random random = new Random();
     ConfigDataBase configDataBase = new ConfigDataBase();
-    DbConnector dbConnector = new DbConnector(configDataBase);
-    HumanRepository humanRepository = new HumanRepository(dbConnector);
-    ReviserRepository reviserRepository = new ReviserRepository(dbConnector);
-    StudentRepository studentRepository = new StudentRepository(dbConnector);
-    TeacherRepository teacherRepository = new TeacherRepository(dbConnector);
+    HikariConfiguration hikariDataBase = new HikariConfiguration(configDataBase, false);
+    HikariConfiguration hikariTables = new HikariConfiguration(configDataBase, true);
+    HumanRepository humanRepository = new HumanRepository(hikariTables);
+    ReviserRepository reviserRepository = new ReviserRepository(hikariTables);
+    StudentRepository studentRepository = new StudentRepository(hikariTables);
+    TeacherRepository teacherRepository = new TeacherRepository(hikariTables);
     UserService userService = new UserService(faker, random, humanRepository, reviserRepository, studentRepository, teacherRepository);
-    CreateSchema createSchema = new CreateSchema(dbConnector);
+    CreateSchema createSchemaDb = new CreateSchema(hikariDataBase);
+    CreateSchema createSchemaTables = new CreateSchema(hikariTables);
     MariaDbDeploy deployMaria = new MariaDbDeploy(configDataBase);
 
     @BeforeAll
     void clean() {
+        createDirectoryIfNotExists(configDataBase.getDirectory());
         deployMaria.startEmbeddedMariaDB();
-        System.out.println("START !!!!!");
-        createSchema.createDataBase();
-        createSchema.createTables();
+        createSchemaDb.createDataBase();
+        createSchemaTables.createTables();
     }
 
     @BeforeEach
@@ -54,8 +57,12 @@ class UserServiceTest extends BaseTest {
 
     @AfterAll
     void cleanAfter() {
-        System.out.println("STOP !!!!!");
         deployMaria.stopEmbeddedMariaDB();
+    }
+
+    @Test
+    void setTeacherRepository() {
+        Utils.createDirectoryIfNotExists(configDataBase.getDirectory());
     }
 
     @Test
@@ -258,11 +265,6 @@ class UserServiceTest extends BaseTest {
         Assertions.assertEquals(asList("ReplaceSurnameTeacher", "ReplaceNameTeacher", 42), replacedTeacher);
 
 
-    }
-
-    @Test
-    void setTeacherRepository() {
-        System.out.println(System.getProperty("dir"));
     }
 
     @Test

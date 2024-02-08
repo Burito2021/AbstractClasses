@@ -83,7 +83,7 @@ public class UserService {
         try {
             list = humanRepository.extractAllUsers();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("error "+e);
         }
         return list;
     }
@@ -93,7 +93,7 @@ public class UserService {
         try {
             list = reviserRepository.extractRevisersBySurname(surname);
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("error "+e);
         }
         return list;
     }
@@ -103,7 +103,7 @@ public class UserService {
         try {
             list = studentRepository.extractStudentsBySurname(surname);
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("error "+e);
         }
         return list;
     }
@@ -113,7 +113,7 @@ public class UserService {
         try {
             list = teacherRepository.extractTeacherBySurname(surname);
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("error "+e);
         }
         return list;
     }
@@ -123,7 +123,7 @@ public class UserService {
         try {
             list = humanRepository.countUsersByCategory();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("error "+e);
         }
         return list;
     }
@@ -133,7 +133,7 @@ public class UserService {
         try {
             list = humanRepository.countUsersByCategory();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("error "+e);
         }
         return list;
     }

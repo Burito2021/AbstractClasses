@@ -1,6 +1,7 @@
 package net.education.kyivstar.repositories;
 
 import net.education.kyivstar.config.DbConnector;
+import net.education.kyivstar.config.HikariConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,14 +15,22 @@ public class HumanRepository {
     private static final Logger logger = LoggerFactory.getLogger(HumanRepository.class);
     private Connection conn = null;
     private DbConnector dbConnector;
+    private HikariConfiguration hikari;
 
     public HumanRepository(DbConnector dbConnector) {
         this.dbConnector = dbConnector;
     }
 
-    private void openConnection() {
-        conn = dbConnector.connectMariaDb(true);
+    public HumanRepository(HikariConfiguration hikari) {
+        this.hikari = hikari;
     }
+
+    private void openConnection() throws SQLException {
+        conn = hikari.connect();
+    }
+    /*private void openConnection() {
+        conn = dbConnector.connectMariaDb(true);
+    }*/
 
     public void removeUserBySurname(String surname, String name) throws SQLException {
         openConnection();
@@ -32,12 +41,11 @@ public class HumanRepository {
             ps.addBatch("DELETE FROM TEACHERS WHERE SURNAME='" + surname + "' AND NAME = '" + name + "'");
             ps.addBatch("DELETE FROM REVISERS WHERE SURNAME= '" + surname + "' AND NAME = '" + name + "'");
             ps.executeBatch();
-        } catch (SQLException e) {
-
             logger.info("ROWS DELETED SUCCESSFULLY");
+        } catch (SQLException e) {
+            throw new RuntimeException("error: "+e);
         } finally {
             ps.close();
-            conn.close();
         }
     }
 
@@ -58,7 +66,7 @@ public class HumanRepository {
                 resultTasks.put(rs.getString("TYPE"), rs.getInt("COUNT"));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("error: "+e);
         } finally {
             ps.close();
             conn.close();
@@ -85,7 +93,7 @@ public class HumanRepository {
                 resultTasks.add(rs.getInt("AGE"));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("error: "+e);
         } finally {
             ps.close();
             conn.close();
@@ -116,7 +124,7 @@ public class HumanRepository {
                 resultTasks.add(rs.getInt("AGE"));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("error: "+e);
         } finally {
             ps.close();
             conn.close();
@@ -133,7 +141,7 @@ public class HumanRepository {
             st.addBatch("TRUNCATE TABLE TEACHERS");
             st.executeBatch();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("error: "+e);
         } finally {
             st.close();
             conn.close();

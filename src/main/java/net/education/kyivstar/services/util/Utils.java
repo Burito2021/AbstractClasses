@@ -1,13 +1,17 @@
 package net.education.kyivstar.services.util;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class Utils {
+    private static Logger logger = LoggerFactory.getLogger(Utils.class);
 
     public static String currentDateTime() {
         var dateAndTime = LocalDateTime.now();
@@ -22,7 +26,7 @@ public class Utils {
                 scriptContent.append(line).append("\n");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error, config reading failure: "+e);
         }
         return scriptContent.toString();
     }
@@ -36,8 +40,26 @@ public class Utils {
                 scriptContent.append(System.lineSeparator());
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error, config reading failure: " + e);
         }
         return scriptContent.toString();
     }
+
+    public static void createDirectoryIfNotExists(String directoryPath) {
+
+        Path path = Paths.get(directoryPath);
+
+        if (!Files.exists(path)) {
+
+            try {
+                Files.createDirectories(path);
+                logger.info("Directory created successfully");
+            } catch (IOException e) {
+                logger.info("Failed to create directory: " + e.getMessage());
+            }
+        } else {
+            logger.info("Directory already exists");
+        }
+    }
+
 }

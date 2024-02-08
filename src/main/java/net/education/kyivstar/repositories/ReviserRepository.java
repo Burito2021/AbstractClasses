@@ -1,6 +1,7 @@
 package net.education.kyivstar.repositories;
 
 import net.education.kyivstar.config.DbConnector;
+import net.education.kyivstar.config.HikariConfiguration;
 import net.education.kyivstar.services.user.UserService;
 import net.education.kyivstar.services.util.Utils;
 import org.slf4j.Logger;
@@ -18,14 +19,22 @@ public class ReviserRepository {
 
     private Connection conn = null;
     private DbConnector dbConnector;
+    private HikariConfiguration hikari;
+
+    public ReviserRepository(HikariConfiguration hikari) {
+        this.hikari = hikari;
+    }
 
     public ReviserRepository(DbConnector dbConnector) {
         this.dbConnector = dbConnector;
     }
 
-    private void openConnection() {
-        conn = dbConnector.connectMariaDb(true);
+    private void openConnection() throws SQLException {
+        conn = hikari.connect();
     }
+    /*private void openConnection() {
+        conn = dbConnector.connectMariaDb(true);
+    }*/
 
     public void addReviser(String surname, String name, int age) throws SQLException {
         openConnection();
@@ -41,7 +50,7 @@ public class ReviserRepository {
             logger.info("Insert " + insert + " " + String.valueOf(ps));
             logger.info(String.valueOf(ps));
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("error: "+e);
         } finally {
             ps.close();
             conn.close();
@@ -64,7 +73,7 @@ public class ReviserRepository {
                 resultTasks.add(rs.getInt("AGE"));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("error: "+e);
         } finally {
             ps.close();
             conn.close();
@@ -89,7 +98,7 @@ public class ReviserRepository {
                 resultTasks.add(rs.getInt("AGE"));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("error: "+e);
         } finally {
             ps.close();
             conn.close();
@@ -109,7 +118,7 @@ public class ReviserRepository {
             ps.executeUpdate();
             logger.info(String.valueOf(ps));
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("error: "+e);
         } finally {
             ps.close();
             conn.close();
@@ -124,7 +133,7 @@ public class ReviserRepository {
             ps.setString(1, surname);
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("error: "+e);
         } finally {
             ps.close();
             conn.close();

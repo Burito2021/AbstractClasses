@@ -1,6 +1,7 @@
 package net.education.kyivstar.repositories;
 
 import net.education.kyivstar.config.DbConnector;
+import net.education.kyivstar.config.HikariConfiguration;
 import net.education.kyivstar.services.user.UserService;
 import net.education.kyivstar.services.util.Utils;
 import org.slf4j.Logger;
@@ -16,16 +17,23 @@ import java.util.List;
 public class StudentRepository {
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
     private Connection conn = null;
-
+    private HikariConfiguration hikari;
     private DbConnector dbConnector;
+
+    public StudentRepository(HikariConfiguration hikari) {
+        this.hikari = hikari;
+    }
 
     public StudentRepository(DbConnector dbConnector) {
         this.dbConnector = dbConnector;
     }
 
-    private void openConnection() {
-        conn = dbConnector.connectMariaDb(true);
+    private void openConnection() throws SQLException {
+        conn = hikari.connect();
     }
+    /*private void openConnection() {
+        conn = dbConnector.connectMariaDb(true);
+    }*/
 
     public void addStudent(String surname, String name, int age) throws SQLException {
         openConnection();
@@ -41,7 +49,7 @@ public class StudentRepository {
             logger.info("Insert " + insert + " " + String.valueOf(ps));
             logger.info(String.valueOf(ps));
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("error: "+e);
         } finally {
             ps.close();
             conn.close();
@@ -67,12 +75,11 @@ public class StudentRepository {
             }
             System.out.println(ps);
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("error: "+e);
         } finally {
             ps.close();
             conn.close();
         }
-        System.out.println(resultTasks);
         return resultTasks;
     }
 
@@ -92,7 +99,7 @@ public class StudentRepository {
                 resultTasks.add(rs.getInt("AGE"));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("error: "+e);
         } finally {
             ps.close();
             conn.close();
@@ -112,7 +119,7 @@ public class StudentRepository {
             ps.executeUpdate();
             logger.info(String.valueOf(ps));
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("error: "+e);
         } finally {
             ps.close();
             conn.close();
@@ -127,7 +134,7 @@ public class StudentRepository {
             ps.setString(1, surname);
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("error: "+e);
         } finally {
             ps.close();
             conn.close();

@@ -1,63 +1,54 @@
 package net.education.kyivstar.config;
 
-import com.github.javafaker.Faker;
 import net.education.kyivstar.BaseTest;
-import net.education.kyivstar.repositories.HumanRepository;
 import net.education.kyivstar.repositories.ReviserRepository;
 import net.education.kyivstar.repositories.StudentRepository;
 import net.education.kyivstar.repositories.TeacherRepository;
-import net.education.kyivstar.services.user.UserService;
-import net.education.kyivstar.services.util.Utils;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
 import java.io.InputStream;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.Random;
 
+import static net.education.kyivstar.services.util.Utils.createDirectoryIfNotExists;
 import static net.education.kyivstar.services.util.Utils.readSqlScriptFromFileStream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
+@TestInstance(PER_CLASS)
 class ConfigTest extends BaseTest {
-    Faker faker = new Faker();
-    Random random = new Random();
-    ConfigDataBase configDataBase = new ConfigDataBase();
-    DbConnector dbConnector = new DbConnector(configDataBase);
-    HumanRepository humanRepository = new HumanRepository(dbConnector);
-    ReviserRepository reviserRepository = new ReviserRepository(dbConnector);
-    StudentRepository studentRepository = new StudentRepository(dbConnector);
-    TeacherRepository teacherRepository = new TeacherRepository(dbConnector);
-    UserService userService = new UserService(faker, random, humanRepository, reviserRepository, studentRepository, teacherRepository);
 
+    ConfigDataBase configDataBase = new ConfigDataBase();
+    HikariConfiguration hikariDataBase = new HikariConfiguration(configDataBase, false);
+    HikariConfiguration hikariTables = new HikariConfiguration(configDataBase, true);
+    ReviserRepository reviserRepository = new ReviserRepository(hikariTables);
+    StudentRepository studentRepository = new StudentRepository(hikariTables);
+    TeacherRepository teacherRepository = new TeacherRepository(hikariTables);
+    CreateSchema createSchemaDb = new CreateSchema(hikariDataBase);
+    CreateSchema createSchemaTables = new CreateSchema(hikariTables);
     MariaDbDeploy deployMaria = new MariaDbDeploy(configDataBase);
 
+    @BeforeAll
+    void clean() {
+        createDirectoryIfNotExists(configDataBase.getDirectory());
+        deployMaria.startEmbeddedMariaDB();
+        createSchemaDb.createDataBase();
+    }
 
- /*   @Test
-    void loadConfigTest() {
-        configDataBase.loadConfig();
-
-        assertEquals("jdbc:mariadb://localhost", configDataBase.getUrl());
-        assertEquals(3536, configDataBase.getPort());
-        assertEquals("user", configDataBase.getUser());
-        assertEquals("password", configDataBase.getPass());
-        assertEquals("EDUCATION", configDataBase.getDbName());
-        assertEquals("D:\\Education\\MariaBBB\\ddddddddddddddd\\13", configDataBase.getDirectory());
-    }*/
-
-    @Test
-    void setTeacherRepository() {
-        System.out.println(System.getProperty("user.dir"));
+    @AfterAll
+    void cleanAfter() {
+        deployMaria.stopEmbeddedMariaDB();
     }
 
     @Test
-    void createTablesTest() throws SQLException, InterruptedException {
+    void createTablesTest() throws SQLException {
         try {
-            deployMaria.startEmbeddedMariaDB();
-            CreateSchema createSchema = new CreateSchema(dbConnector);
-            createSchema.createTables();
-            Connection conn = dbConnector.connectMariaDb(true);
+            createSchemaTables.createTables();
+
             reviserRepository.addReviser("Gig", "Tom", 23);
             final var revisers = reviserRepository.extractAllRevisers();
 

@@ -22,22 +22,19 @@ public class MariaDbDeploy {
             db = DB.newEmbeddedDB(config.build());
             db.start();
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException("Start of embedded mariaDb failed due to "+e);
         }
     }
 
     public void stopEmbeddedMariaDB() {
         try {
-
-            System.out.println("Stopping embedded MariaDB...");
             logger.info("Stopping embedded MariaDB...");
             if (db != null) {
                 db.stop();
-                System.out.println("Embedded MariaDB stopped successfully.");
                 logger.info("Embedded MariaDB stopped successfully.");
             }
         } catch (Exception e) {
-            logger.error("Error stopping embedded MariaDB", e);
+            logger.debug("Error stopping embedded MariaDB", e);
         }
     }
 }
