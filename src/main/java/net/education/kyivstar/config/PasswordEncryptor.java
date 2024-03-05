@@ -4,19 +4,15 @@ import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 
 public class PasswordEncryptor {
     private final String SECRET_WORD = "joke";
+    private final StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
 
-    public static String encrypt(String password) {
-        var secretWord = new PasswordEncryptor().SECRET_WORD;
-        var encryptor = new StandardPBEStringEncryptor();
-        encryptor.setPassword(secretWord);
-
+    public String encrypt(String password) {
+        encryptor.setPassword(SECRET_WORD);
         return encryptor.encrypt(password);
     }
-    public static String decrypt(String password){
-        var secretWord = new PasswordEncryptor().SECRET_WORD;
-        var encryptor = new StandardPBEStringEncryptor();
-        encryptor.setPassword(secretWord);
 
+    public String decrypt(String password) {
+        encryptor.setPassword(SECRET_WORD);
         return encryptor.decrypt(password);
     }
 }
