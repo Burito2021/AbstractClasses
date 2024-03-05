@@ -2,10 +2,7 @@ package net.education.kyivstar.userServices;
 
 import com.github.javafaker.Faker;
 import net.education.kyivstar.BaseTest;
-import net.education.kyivstar.config.ConfigDataBase;
-import net.education.kyivstar.config.EmbeddedMariaDbLifeCycle;
-import net.education.kyivstar.config.HikariConnectionManager;
-import net.education.kyivstar.config.SchemaAndTableCreator;
+import net.education.kyivstar.config.*;
 import net.education.kyivstar.repositories.HumanRepository;
 import net.education.kyivstar.repositories.ReviserRepository;
 import net.education.kyivstar.repositories.StudentRepository;
@@ -26,7 +23,8 @@ import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 class UserServiceTest extends BaseTest {
     Faker faker = new Faker();
     Random random = new Random();
-    ConfigDataBase configDataBase = new ConfigDataBase();
+    PasswordEncryptor passwordEncryptor = new PasswordEncryptor();
+    ConfigDataBase configDataBase = new ConfigDataBase(passwordEncryptor);
     EmbeddedMariaDbLifeCycle embeddedMariaDbLifeCycle = new EmbeddedMariaDbLifeCycle(configDataBase);
     SchemaAndTableCreator createSchema = new SchemaAndTableCreator(embeddedMariaDbLifeCycle);
     HikariConnectionManager hikari = HikariConnectionManager.getInstance(configDataBase);

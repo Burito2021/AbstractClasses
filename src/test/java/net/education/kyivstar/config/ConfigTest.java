@@ -17,15 +17,14 @@ import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
 @TestInstance(PER_CLASS)
 class ConfigTest extends BaseTest {
-
-    ConfigDataBase configDataBase = new ConfigDataBase();
+    PasswordEncryptor passwordEncryptor = new PasswordEncryptor();
+    ConfigDataBase configDataBase = new ConfigDataBase(passwordEncryptor);
     EmbeddedMariaDbLifeCycle embeddedMariaDbLifeCycle = new EmbeddedMariaDbLifeCycle(configDataBase);
     HikariConnectionManager hikari = HikariConnectionManager.getInstance(configDataBase);
     ReviserRepository reviserRepository = new ReviserRepository(hikari);
     StudentRepository studentRepository = new StudentRepository(hikari);
     TeacherRepository teacherRepository = new TeacherRepository(hikari);
     SchemaAndTableCreator createSchema = new SchemaAndTableCreator(embeddedMariaDbLifeCycle);
-
 
     @Test
     void createTablesTest() {
@@ -51,14 +50,14 @@ class ConfigTest extends BaseTest {
 
     @Test
     void encryptTest() {
-        final var password = PasswordEncryptor.encrypt("test");
+        final var password = passwordEncryptor.encrypt("test");
         assertNotNull(password);
     }
 
     @Test
     void decryptTest() {
-        final var passwordEncrypt = PasswordEncryptor.encrypt("test");
-        final var passwordDecrypt = PasswordEncryptor.decrypt(passwordEncrypt);
+        final var passwordEncrypt = passwordEncryptor.encrypt("test");
+        final var passwordDecrypt = passwordEncryptor.decrypt(passwordEncrypt);
         assertEquals("test", passwordDecrypt);
     }
 

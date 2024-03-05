@@ -1,10 +1,7 @@
 package net.education.kyivstar;
 
 import com.github.javafaker.Faker;
-import net.education.kyivstar.config.ConfigDataBase;
-import net.education.kyivstar.config.EmbeddedMariaDbLifeCycle;
-import net.education.kyivstar.config.HikariConnectionManager;
-import net.education.kyivstar.config.SchemaAndTableCreator;
+import net.education.kyivstar.config.*;
 import net.education.kyivstar.repositories.HumanRepository;
 import net.education.kyivstar.repositories.ReviserRepository;
 import net.education.kyivstar.repositories.StudentRepository;
@@ -21,7 +18,8 @@ public class Application {
     public static void main(String[] args) {
         var faker = new Faker();
         var random = new Random();
-        var configDataBase = new ConfigDataBase();
+        var passwordEncryptor = new PasswordEncryptor();
+        var configDataBase = new ConfigDataBase(passwordEncryptor);
         var embeddedMariaDbLifeCycle = new EmbeddedMariaDbLifeCycle(configDataBase);
         var createSchema = new SchemaAndTableCreator(embeddedMariaDbLifeCycle);
         createSchema.createDataBase();
@@ -31,6 +29,7 @@ public class Application {
         var studentRepository = new StudentRepository(hikariConnectManager);
         var teacherRepository = new TeacherRepository(hikariConnectManager);
         var userService = new UserService(faker, random, humanRepository, reviserRepository, studentRepository, teacherRepository);
+
 
         try {
             createSchema.createTables();
