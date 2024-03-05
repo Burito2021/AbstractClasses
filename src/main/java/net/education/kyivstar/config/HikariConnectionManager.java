@@ -11,7 +11,7 @@ public class HikariConnectionManager {
     private final static Logger logger = LoggerFactory.getLogger(HikariConnectionManager.class);
     private static HikariConnectionManager instance;
     private final ConfigDataBase configDataBase;
-    private com.zaxxer.hikari.HikariConfig hikariConfig = new com.zaxxer.hikari.HikariConfig();
+    private final com.zaxxer.hikari.HikariConfig hikariConfig = new com.zaxxer.hikari.HikariConfig();
     private HikariDataSource ds;
 
     public HikariConnectionManager(ConfigDataBase configDataBase) {

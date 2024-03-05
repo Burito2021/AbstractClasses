@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.InputStream;
 import java.util.Map;
 import java.util.Optional;
 
@@ -23,6 +22,7 @@ public class ConfigDataBase {
     private final static String PASSWORD = "password";
     private final static String DIRECTORY = "directory";
     private final static String CONFIG_PATH = "config/application.yml";
+    private final PasswordEncryptor passwordEncryptor;
 
     private String url;
     private int port;
@@ -33,7 +33,8 @@ public class ConfigDataBase {
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigDataBase.class);
 
-    public ConfigDataBase() {
+    public ConfigDataBase(PasswordEncryptor passwordEncryptor) {
+        this.passwordEncryptor = passwordEncryptor;
         loadConfig();
         createDirectoryIfNotExists(valueOf(getDirectory()));
     }
@@ -79,7 +80,7 @@ public class ConfigDataBase {
             if (((String) dbConfig.get(PASSWORD)).startsWith(ENC)
                     && ((String) dbConfig.get(PASSWORD)).endsWith(BACK_BRACKET)) {
                 var encryptedPassword = (String) dbConfig.get(PASSWORD);
-                password = PasswordEncryptor.decrypt(encryptedPassword.substring(4, encryptedPassword.length() - 1));
+                password = passwordEncryptor.decrypt(encryptedPassword.substring(4, encryptedPassword.length() - 1));
             } else {
                 password = (String) dbConfig.get(PASSWORD);
             }

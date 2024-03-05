@@ -1,11 +1,11 @@
 package net.education.kyivstar.config;
 
 import net.education.kyivstar.BaseTest;
-import net.education.kyivstar.repositories.ReviserRepository;
-import net.education.kyivstar.repositories.StudentRepository;
-import net.education.kyivstar.repositories.TeacherRepository;
+import net.education.kyivstar.userServices.TestContext;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 
 import java.io.InputStream;
 import java.util.Arrays;
@@ -13,52 +13,54 @@ import java.util.Arrays;
 import static net.education.kyivstar.services.util.Utils.readSqlScriptFromFileStream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
-@TestInstance(PER_CLASS)
 class ConfigTest extends BaseTest {
+    static TestContext testContext;
 
-    ConfigDataBase configDataBase = new ConfigDataBase();
-    EmbeddedMariaDbLifeCycle embeddedMariaDbLifeCycle = new EmbeddedMariaDbLifeCycle(configDataBase);
-    HikariConnectionManager hikari = HikariConnectionManager.getInstance(configDataBase);
-    ReviserRepository reviserRepository = new ReviserRepository(hikari);
-    StudentRepository studentRepository = new StudentRepository(hikari);
-    TeacherRepository teacherRepository = new TeacherRepository(hikari);
-    SchemaAndTableCreator createSchema = new SchemaAndTableCreator(embeddedMariaDbLifeCycle);
+    @BeforeAll
+    static void init() {
+        testContext = new TestContext();
+        testContext.getCreateSchema().createTables();
+    }
 
+    @AfterAll
+    static void destroy() {
+        testContext.getHikariConnectManager().closeConnection();
+        testContext.getEmbeddedMariaDbLifeCycle().stopEmbeddedMariaDB();
+    }
+
+    @BeforeEach
+    void cleanRepository() {
+        testContext.getUserService().removeAll();
+    }
 
     @Test
     void createTablesTest() {
-        try {
-            createSchema.createTables();
+        testContext.getCreateSchema().createTables();
 
-            reviserRepository.addReviser("Gig", "Tom", 23);
-            final var revisers = reviserRepository.extractAllRevisers();
+        testContext.getReviserRepository().addReviser("Gig", "Tom", 23);
+        final var revisers = testContext.getReviserRepository().extractAllRevisers();
 
-            studentRepository.addStudent("Bib", "Tom", 21);
-            final var students = studentRepository.extractAllStudents();
+        testContext.getStudentRepository().addStudent("Bib", "Tom", 21);
+        final var students = testContext.getStudentRepository().extractAllStudents();
 
-            teacherRepository.addTeacher("Fin", "Tom", 33);
-            final var teachers = teacherRepository.extractAllTeachers();
+        testContext.getTeacherRepository().addTeacher("Fin", "Tom", 33);
+        final var teachers = testContext.getTeacherRepository().extractAllTeachers();
 
-            assertEquals(Arrays.asList("Gig", "Tom", 23), revisers);
-            assertEquals(Arrays.asList("Bib", "Tom", 21), students);
-            assertEquals(Arrays.asList("Fin", "Tom", 33), teachers);
-        } finally {
-            embeddedMariaDbLifeCycle.stopEmbeddedMariaDB();
-        }
+        assertEquals(Arrays.asList("Gig", "Tom", 23), revisers);
+        assertEquals(Arrays.asList("Bib", "Tom", 21), students);
+        assertEquals(Arrays.asList("Fin", "Tom", 33), teachers);
     }
 
     @Test
     void encryptTest() {
-        final var password = PasswordEncryptor.encrypt("test");
+        final var password = testContext.getPasswordEncryptor().encrypt("test");
         assertNotNull(password);
     }
 
     @Test
     void decryptTest() {
-        final var passwordEncrypt = PasswordEncryptor.encrypt("test");
-        final var passwordDecrypt = PasswordEncryptor.decrypt(passwordEncrypt);
+        final var passwordDecrypt = testContext.getPasswordEncryptor().decrypt("x/PhWKj6AD+chPfHqr984g==");
         assertEquals("test", passwordDecrypt);
     }
 
