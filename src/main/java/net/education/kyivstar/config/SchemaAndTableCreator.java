@@ -1,3 +1,4 @@
+
 package net.education.kyivstar.config;
 
 import org.slf4j.Logger;
@@ -20,7 +21,8 @@ public class SchemaAndTableCreator {
         this.embeddedMariaDbLifeCycle = embeddedMariaDbLifeCycle;
     }
 
-    public void createDataBase() {try (var connDb = embeddedMariaDbLifeCycle.connectMariaDb(false);
+    public void createDataBase() {
+        try (var connDb = embeddedMariaDbLifeCycle.connectMariaDb(false);
              var statement = connDb.createStatement();
              var inputStream = getClass().getClassLoader().getResourceAsStream(DATABASE_PATH)) {
 
