@@ -133,6 +133,10 @@ public class UserService {
         humanRepository.removeAll();
     }
 
+    public void removeAl1l() {
+        humanRepository.removeAll();
+    }
+
     public String printStorageAllUsers() {
         final var text = "What is in the storage printStorage method: ";
         logger.info(text + collectAllUsers());

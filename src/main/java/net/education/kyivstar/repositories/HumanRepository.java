@@ -1,5 +1,6 @@
 package net.education.kyivstar.repositories;
 
+import net.education.kyivstar.stuff.SynchronizedLockHikari;
 import net.education.kyivstar.config.HikariConnectionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ public class HumanRepository {
     private static final Logger logger = LoggerFactory.getLogger(HumanRepository.class);
 
     private HikariConnectionManager hikari;
+    private SynchronizedLockHikari sync;
 
     public HumanRepository(HikariConnectionManager hikari) {
         this.hikari = hikari;
@@ -108,6 +110,19 @@ public class HumanRepository {
 
     public void removeAll() {
         try (var conn = hikari.connect();
+             var st = conn.createStatement()) {
+
+            st.addBatch("TRUNCATE TABLE REVISERS");
+            st.addBatch("TRUNCATE TABLE STUDENTS");
+            st.addBatch("TRUNCATE TABLE TEACHERS");
+            st.executeBatch();
+        } catch (SQLException e) {
+            throw new RuntimeException("error: " + e);
+        }
+    }
+
+    public void removeAll1() {
+        try (var conn = sync.connection();
              var st = conn.createStatement()) {
 
             st.addBatch("TRUNCATE TABLE REVISERS");

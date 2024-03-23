@@ -1,5 +1,6 @@
 package net.education.kyivstar.config;
 
+import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +12,7 @@ public class HikariConnectionManager {
     private final static Logger logger = LoggerFactory.getLogger(HikariConnectionManager.class);
     private static HikariConnectionManager instance;
     private final ConfigDataBase configDataBase;
-    private final com.zaxxer.hikari.HikariConfig hikariConfig = new com.zaxxer.hikari.HikariConfig();
+    private final HikariConfig hikariConfig = new com.zaxxer.hikari.HikariConfig();
     private HikariDataSource ds;
 
     public HikariConnectionManager(ConfigDataBase configDataBase) {
@@ -21,7 +22,11 @@ public class HikariConnectionManager {
 
     public static HikariConnectionManager getInstance(ConfigDataBase configDataBase) {
         if (instance == null) {
-            instance = new HikariConnectionManager(configDataBase);
+            synchronized (HikariConnectionManager.class) {
+                if(instance ==null) {
+                    instance = new HikariConnectionManager(configDataBase);
+                }
+            }
         }
 
         return instance;
@@ -39,7 +44,6 @@ public class HikariConnectionManager {
     }
 
     public Connection connect() {
-
         try {
             return ds.getConnection();
         } catch (SQLException e) {
