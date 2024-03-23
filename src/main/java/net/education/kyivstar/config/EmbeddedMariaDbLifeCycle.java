@@ -10,10 +10,9 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class EmbeddedMariaDbLifeCycle {
+    private final static Logger logger = LoggerFactory.getLogger(EmbeddedMariaDbLifeCycle.class);
     private final ConfigDataBase conf;
     private DB db = null;
-
-    private final static Logger logger = LoggerFactory.getLogger(EmbeddedMariaDbLifeCycle.class);
 
     public EmbeddedMariaDbLifeCycle(ConfigDataBase conf) {
         this.conf = conf;
@@ -30,7 +29,7 @@ public class EmbeddedMariaDbLifeCycle {
             db.start();
         } catch (Exception e) {
             logger.debug("Start of embedded mariaDb failed due to " + e);
-            throw new RuntimeException("Start of embedded mariaDb failed due to "+e);
+            throw new RuntimeException("Start of embedded mariaDb failed due to " + e);
         }
     }
 

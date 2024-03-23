@@ -20,7 +20,8 @@ public class SchemaAndTableCreator {
         this.embeddedMariaDbLifeCycle = embeddedMariaDbLifeCycle;
     }
 
-    public void createDataBase() {try (var connDb = embeddedMariaDbLifeCycle.connectMariaDb(false);
+    public void createDataBase() {
+        try (var connDb = embeddedMariaDbLifeCycle.connectMariaDb(false);
              var statement = connDb.createStatement();
              var inputStream = getClass().getClassLoader().getResourceAsStream(DATABASE_PATH)) {
 
@@ -44,6 +45,7 @@ public class SchemaAndTableCreator {
     }
 
     private void create(InputStream inputStream, Statement statement, Connection connDb) throws SQLException {
+
         var sqlScript = readSqlScriptFromFileStream(inputStream);
         var statements = sqlScript.split(";");
         connDb.setAutoCommit(false);

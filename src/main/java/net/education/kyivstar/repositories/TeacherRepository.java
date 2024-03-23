@@ -52,7 +52,7 @@ public class TeacherRepository {
                 resultTasks.add(rs.getInt("AGE"));
             }
         } catch (SQLException e) {
-            throw new RuntimeException("error: "+e);
+            throw new RuntimeException("error: " + e);
         }
         return resultTasks;
     }

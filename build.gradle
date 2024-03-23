@@ -37,7 +37,7 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junit}")
     testRuntimeOnly("com.github.javafaker:javafaker:${faker}")
     implementation("org.mariadb.jdbc:mariadb-java-client:${mariaDb}")
-    implementation( "com.zaxxer:HikariCP:${hikari}")
+    implementation("com.zaxxer:HikariCP:${hikari}")
 }
 
 test {
