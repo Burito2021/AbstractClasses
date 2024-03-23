@@ -4,6 +4,7 @@ import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 
 public class PasswordEncryptor {
     private final String SECRET_WORD = "joke";
+    private final StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
 
     public String encrypt(String password) {
         final StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
