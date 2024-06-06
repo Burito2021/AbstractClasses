@@ -46,6 +46,7 @@ public class SchemaAndTableCreator {
     }
 
     private void create(InputStream inputStream, Statement statement, Connection connDb) throws SQLException {
+
         var sqlScript = readSqlScriptFromFileStream(inputStream);
         var statements = sqlScript.split(";");
         connDb.setAutoCommit(false);

@@ -30,7 +30,6 @@ public class Application {
         var teacherRepository = new TeacherRepository(hikariConnectManager);
         var userService = new UserService(faker, random, humanRepository, reviserRepository, studentRepository, teacherRepository);
 
-
         try {
             createSchema.createTables();
             userService.populateStorage(10);
