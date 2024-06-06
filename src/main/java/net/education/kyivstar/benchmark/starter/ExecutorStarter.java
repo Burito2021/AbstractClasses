@@ -6,8 +6,6 @@ import net.education.kyivstar.benchmark.Task;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Executors;
 
 public class ExecutorStarter extends LogicExecutionStarter {
