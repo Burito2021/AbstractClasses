@@ -22,16 +22,14 @@ public class ConfigDataBase {
     private final static String PASSWORD = "password";
     private final static String DIRECTORY = "directory";
     private final static String CONFIG_PATH = "config/application.yml";
+    private static final Logger logger = LoggerFactory.getLogger(ConfigDataBase.class);
     private final PasswordEncryptor passwordEncryptor;
-
     private String url;
     private int port;
     private String dbName;
     private String directory;
     private String user;
     private String password;
-
-    private static final Logger logger = LoggerFactory.getLogger(ConfigDataBase.class);
 
     public ConfigDataBase(PasswordEncryptor passwordEncryptor) {
         this.passwordEncryptor = passwordEncryptor;
@@ -86,7 +84,7 @@ public class ConfigDataBase {
             }
         } catch (Exception e) {
             logger.debug("Config build failed due to " + e);
-            throw new RuntimeException("Config build failed due to "+e);
+            throw new RuntimeException("Config build failed due to " + e);
         }
     }
 }

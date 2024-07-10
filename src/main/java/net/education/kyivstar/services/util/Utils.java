@@ -28,7 +28,7 @@ public class Utils {
                 scriptContent.append(line).append("\n");
             }
         } catch (Exception e) {
-            throw new RuntimeException("Error, config reading failure: "+e);
+            throw new RuntimeException("Error, config reading failure: " + e);
         }
 
         return scriptContent.toString();

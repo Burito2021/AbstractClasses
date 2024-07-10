@@ -8,11 +8,11 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public class SynchronizedLockHikari {
-    private final ConfigDataBase configDataBase;
+    private static final Object lock = new Object();
     private static SynchronizedLockHikari instance;
+    private final ConfigDataBase configDataBase;
     private final HikariConfig hikariConfig = new HikariConfig();
     private HikariDataSource ds;
-    private static final Object lock = new Object();
 
 
     private SynchronizedLockHikari(ConfigDataBase configDataBase) {

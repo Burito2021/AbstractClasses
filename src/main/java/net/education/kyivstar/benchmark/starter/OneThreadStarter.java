@@ -1,7 +1,7 @@
 package net.education.kyivstar.benchmark.starter;
 
-import net.education.kyivstar.benchmark.Task;
 import net.education.kyivstar.benchmark.LogicExecutionStarter;
+import net.education.kyivstar.benchmark.Task;
 
 public class OneThreadStarter extends LogicExecutionStarter {
     @Override

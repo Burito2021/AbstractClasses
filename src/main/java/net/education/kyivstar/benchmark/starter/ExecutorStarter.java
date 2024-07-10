@@ -19,12 +19,15 @@ public class ExecutorStarter extends LogicExecutionStarter {
 
         var executorService = Executors.newFixedThreadPool(10);
         List<Callable<Void>> tasks = new ArrayList<>(numberOfTasks);
-          List<Callable<Void>> t = new ArrayList<>(numberOfTasks);
+        List<Callable<Void>> t = new ArrayList<>(numberOfTasks);
 
-          for (int i = 0; i < numberOfTasks; i++){
-              t.add(()->{logic.execute();return null;});
-          }
-          
+        for (int i = 0; i < numberOfTasks; i++) {
+            t.add(() -> {
+                logic.execute();
+                return null;
+            });
+        }
+
         for (int x = 0; x < numberOfTasks; x++) {
             tasks.add(() -> {
                 logic.execute();
@@ -35,7 +38,7 @@ public class ExecutorStarter extends LogicExecutionStarter {
             executorService.invokeAll(tasks);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            logger.info("Error "+e);
+            logger.info("Error " + e);
         } finally {
             executorService.shutdown();
         }

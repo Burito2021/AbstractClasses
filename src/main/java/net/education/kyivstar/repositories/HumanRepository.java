@@ -1,7 +1,7 @@
 package net.education.kyivstar.repositories;
 
-import net.education.kyivstar.stuff.SynchronizedLockHikari;
 import net.education.kyivstar.config.HikariConnectionManager;
+import net.education.kyivstar.stuff.SynchronizedLockHikari;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

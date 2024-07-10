@@ -23,7 +23,7 @@ public class HikariConnectionManager {
     public static HikariConnectionManager getInstance(ConfigDataBase configDataBase) {
         if (instance == null) {
             synchronized (HikariConnectionManager.class) {
-                if(instance ==null) {
+                if (instance == null) {
                     instance = new HikariConnectionManager(configDataBase);
                 }
             }

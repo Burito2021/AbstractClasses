@@ -1,4 +1,3 @@
-
 package net.education.kyivstar.config;
 
 import org.slf4j.Logger;

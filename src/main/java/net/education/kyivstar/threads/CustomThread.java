@@ -12,12 +12,14 @@ public class CustomThread extends Thread {
     public void run() {
 
         for (int i = 0; i < 10; i++) {
-            logger.info(Thread.currentThread().getName()+">>>>> " + i);
+            logger.info(Thread.currentThread().getName() + ">>>>> " + i);
             try {
 
                 TimeUnit.SECONDS.sleep(1);
 
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                logger.info("Error "+e);
                 return;
             }
         }

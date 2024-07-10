@@ -8,8 +8,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public class SynchronizedHikari {
-    private final ConfigDataBase configDataBase;
     private static SynchronizedHikari instance;
+    private final ConfigDataBase configDataBase;
     private final HikariConfig hikariConfig = new HikariConfig();
     private volatile HikariDataSource ds;
 
@@ -17,22 +17,22 @@ public class SynchronizedHikari {
         this.configDataBase = configDataBase;
     }
 
-    public synchronized static SynchronizedHikari getInstance(ConfigDataBase configDataBase){
-        if(instance==null) {
+    public synchronized static SynchronizedHikari getInstance(ConfigDataBase configDataBase) {
+        if (instance == null) {
             instance = new SynchronizedHikari(configDataBase);
         }
         return instance;
     }
 
- public  void delay(){
+    public void delay() {
 
- }
+    }
 
     public synchronized Connection connection() {
-            try {
-                return ds.getConnection();
-            } catch (SQLException e) {
-                throw new RuntimeException("Error connecting pool to DB: " + e);
+        try {
+            return ds.getConnection();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error connecting pool to DB: " + e);
         }
     }
 }
