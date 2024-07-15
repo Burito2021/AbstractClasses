@@ -1,9 +1,9 @@
 database:
   url: jdbc:mariadb://localhost
-  port: 1261
+  port: 1262
   username: 'user'
   password: 'user'
   dbName: 'EDUCATION'
-  directory: "D:\\212R11R2r"
+  directory: "D:\\21112R11R2r"
 resource:
   path: mariaDb/init.sql
