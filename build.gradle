@@ -1,8 +1,12 @@
 plugins {
     id 'java'
     id 'application'
+    id 'me.champeau.gradle.jmh' version '0.5.0'
 }
 
+repositories {
+    jcenter()
+}
 application {
     mainClassName = 'net.education.kyivstar.Application'
 }
@@ -38,12 +42,19 @@ dependencies {
     testRuntimeOnly("com.github.javafaker:javafaker:${faker}")
     implementation("org.mariadb.jdbc:mariadb-java-client:${mariaDb}")
     implementation("com.zaxxer:HikariCP:${hikari}")
+    implementation("org.openjdk.jmh:jmh-core:${bench}")
+    implementation("org.openjdk.jmh:jmh-generator-annprocess:${bench}")
 }
 
 test {
     useJUnitPlatform()
 }
 
+jmh {
+    // Configure JMH tasks here
+    iterations = 5
+    timeUnit = 'seconds'
+}
 
 jar {
     duplicatesStrategy = 'exclude'

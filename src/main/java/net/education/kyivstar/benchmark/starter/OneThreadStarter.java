@@ -6,7 +6,7 @@ import net.education.kyivstar.benchmark.Task;
 public class OneThreadStarter extends LogicExecutionStarter {
     @Override
     protected void performLogic(Task logic) {
-        for (int x = 0; x < 100; x++) {
+        for (int x = 0; x < NUMBER_OF_TASKS; x++) {
             logic.execute();
         }
     }

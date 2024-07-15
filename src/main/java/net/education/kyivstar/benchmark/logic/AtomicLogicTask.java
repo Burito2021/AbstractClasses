@@ -1,6 +1,5 @@
 package net.education.kyivstar.benchmark.logic;
 
-
 import net.education.kyivstar.benchmark.IntegrationService;
 import net.education.kyivstar.benchmark.Task;
 
@@ -13,7 +12,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class AtomicLogicTask implements Task {
     private final IntegrationService integrationService;
     private final AtomicBoolean lock = new AtomicBoolean(false);
-
     public AtomicLogicTask(IntegrationService integrationService) {
         this.integrationService = integrationService;
     }

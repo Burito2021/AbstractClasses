@@ -2,21 +2,30 @@ package net.education.kyivstar.benchmark.starter;
 
 import net.education.kyivstar.benchmark.LogicExecutionStarter;
 import net.education.kyivstar.benchmark.Task;
-import net.education.kyivstar.benchmark.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
-public class ExecutorStarter extends LogicExecutionStarter {
-    private static final Logger logger = LoggerFactory.getLogger(ExecutorStarter.class);
+import static net.education.kyivstar.benchmark.Utils.shutdownExecutor;
+
+public class ThreadPoolExecutorStarter extends LogicExecutionStarter {
+    private static final Logger logger = LoggerFactory.getLogger(ThreadPoolExecutorStarter.class);
 
     @Override
     protected void performLogic(Task logic) {
 
-        var executorService = Executors.newFixedThreadPool(NUMBER_OF_THREADS);
+        var threadPoolExecutor = new ThreadPoolExecutor(
+                NUMBER_OF_THREADS,
+                NUMBER_OF_THREADS,
+                60L,
+                TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>()
+        );
         var tasks = new ArrayList<Callable<Void>>(NUMBER_OF_TASKS);
 
         for (int x = 0; x < NUMBER_OF_TASKS; x++) {
@@ -26,12 +35,14 @@ public class ExecutorStarter extends LogicExecutionStarter {
             });
         }
         try {
-            executorService.invokeAll(tasks);
+            threadPoolExecutor.invokeAll(tasks);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             logger.error("Error: ", e);
         } finally {
-            Utils.shutdownExecutor(executorService);
+            shutdownExecutor(threadPoolExecutor);
         }
     }
+
+
 }

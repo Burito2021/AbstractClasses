@@ -19,7 +19,7 @@ public class CustomThread extends Thread {
 
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                logger.info("Error "+e);
+                logger.error("Error ", e);
                 return;
             }
         }

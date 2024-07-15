@@ -1,15 +1,16 @@
 package net.education.kyivstar.examples;
 
-public class SimpleThreads {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-    // Display a message, preceded by
-    // the name of the current thread
+public class SimpleThreads {
+    private static final Logger logger = LoggerFactory.getLogger(SimpleThreads.class);
+
     static void threadMessage(String message) {
         String threadName =
                 Thread.currentThread().getName();
-        System.out.format("%s: %s%n",
-                threadName,
-                message);
+
+        logger.info("{}: {}", threadName, message);
     }
 
     public static void main(String args[])
@@ -27,7 +28,7 @@ public class SimpleThreads {
             try {
                 patience = Long.parseLong(args[0]) * 1000;
             } catch (NumberFormatException e) {
-                System.err.println("Argument must be an integer.");
+                logger.error("Argument must be an integer.");
                 System.exit(1);
             }
         }

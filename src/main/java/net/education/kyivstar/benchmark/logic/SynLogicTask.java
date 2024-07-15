@@ -1,6 +1,5 @@
 package net.education.kyivstar.benchmark.logic;
 
-
 import net.education.kyivstar.benchmark.IntegrationService;
 import net.education.kyivstar.benchmark.Task;
 
